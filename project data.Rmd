@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "First Draft for STOR 565 Project - Detecting Spam"
 output: html_notebook
 ---
 
