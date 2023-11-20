@@ -3,6 +3,8 @@ title: "First Draft for STOR 565 Project - Detecting Spam"
 output: html_notebook
 ---
 
+# For everyone:
+
 ```{r setup}
 #packages for trees
 library(ISLR)
@@ -41,15 +43,44 @@ test_set <- spam_data[-sampling_choice, ]
 ```
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+# Morgan's Part:
+
 ```{r regression tree}
 #Classification tree used to predict mpg01 using all variables as predictors
-tree.mpg <- tree(yesno ~ ., data = train_set)
+tree.spam <- tree(yesno ~ ., data = train_set)
 
 #Summary that includes used variables, residual mean deviance (similar to entropy), and the training error rate (aka Misclassification error rate)
-summary(tree.mpg)
+summary(tree.spam)
 
 #Plot of tree
-plot(tree.mpg)
-text(tree.mpg, pretty = 0, cex = .5, adj = c(.5, 1))
+plot(tree.spam)
+text(tree.spam, pretty = 0, cex = .5, adj = c(.5, 1))
 title(main = "Unpruned Classification Tree")
+
+#Predicting the classification of the test_set using the unpruned tree
+tree.predict.spam <- predict(tree.spam, test_set, type = "class")
+
+#Resulting table of prediction vs true values
+table.tree <- table(tree.predict.spam, test_set$yesno)
+table.tree
+
+#Resulting correctness
+#Spam ID
+table.tree[2,2]/(table.tree[2,2] + table.tree[1,2])
+#Not Spam ID
+table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
+#Overall
+(table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
 ```
