@@ -158,6 +158,7 @@ title("Test error, interaction level = 1")
 plot(seq(0.001, 0.1, by = .001), train_error, xlab = "lambda")
 title("Train error, interaction level = 1")
 ```
+
 ```{r boosting interaction level 2}
 # #setting the seed
 # set.seed(1243)
@@ -198,7 +199,7 @@ title("Train error, interaction level = 1")
 # title("Train error, interaction level = 2")
 ```
 
-```{r}
+```{r boosting error}
 #Looking at test error
 min(test_error)
 max(test_error)
@@ -237,7 +238,6 @@ importance(bag.spam)
 varImpPlot(bag.spam)
 
 ```
-
     
 ```{r RF pre}
 #Number of predictors
@@ -253,7 +253,7 @@ num_p/3
 ```
 Thus, we can try RF with m=2 and m=3, and look at the performance.
 
-```{r RF}
+```{r RF2}
 #setting the seed
 set.seed(1243)
 
@@ -281,7 +281,7 @@ importance(rf2.spam)
 varImpPlot(rf2.spam)
 ```
 
-```{r}
+```{r RF3}
 #setting the seed
 set.seed(1243)
 
