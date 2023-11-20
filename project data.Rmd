@@ -3,6 +3,14 @@ title: "First Draft for STOR 565 Project - Detecting Spam"
 output: html_notebook
 ---
 
+```{r setup}
+#packages for trees
+library(ISLR)
+library(tree)
+library(randomForest)
+library(gbm)
+```
+
 ```{r completeload}
 library(kernlab)
 data(spam)
@@ -11,8 +19,37 @@ head(spam_complete)
 ```
 
 ```{r tidyload}
+#We're going to use this one!!!!
 spam_small <- tidytuesdayR::tt_load('2023-08-15')
 head(spam_small)
+
+spam_data <- data.frame(spam_small$spam)
+spam_data$yesno <- as.factor(spam_data$yesno)
+```
+
+```{r splitting between test and training}
+#Set seed
+set.seed(123)
+
+#number of observations
+obs_num <- length(spam_data[ , 1])
+
+#Randomly split training data to test data in the ratio of (3:1)=(294:98)
+sampling_choice <- sample(1:obs_num, size = floor(obs_num/2))
+train_set <- spam_data[sampling_choice, ]
+test_set <- spam_data[-sampling_choice, ]
 ```
 
 
+```{r regression tree}
+#Classification tree used to predict mpg01 using all variables as predictors
+tree.mpg <- tree(yesno ~ ., data = train_set)
+
+#Summary that includes used variables, residual mean deviance (similar to entropy), and the training error rate (aka Misclassification error rate)
+summary(tree.mpg)
+
+#Plot of tree
+plot(tree.mpg)
+text(tree.mpg, pretty = 0, cex = .5, adj = c(.5, 1))
+title(main = "Unpruned Classification Tree")
+```
