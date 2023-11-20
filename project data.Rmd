@@ -84,3 +84,37 @@ table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
 #Overall
 (table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
 ```
+
+```{r pruning regression tree}
+#Setting seed because of cross validation
+set.seed(1243)
+
+#Performs cross validation of the unpruned tree to determine the "best" pruning; the last argument specifies that pruning should be done using the misclassification error rate
+cv.tree.spam <- cv.tree(tree.spam, FUN = prune.misclass)
+
+cv.tree.spam
+
+#creating the pruned tree with 6 terminal nodes
+pruned.tree.spam <- prune.misclass(tree.spam, best = 4)
+
+#Plotting the tree
+plot(pruned.tree.spam)
+text(pruned.tree.spam, pretty = 0, cex = .5, adj = c(.5, 1))
+title(main = "Pruned Classification Tree")
+
+#Predicting the classification of the test_set using the pruned tree
+tree.predict.spam <- predict(pruned.tree.spam, test_set, type = "class")
+
+#Resulting table of prediction vs true values
+table.tree <- table(tree.predict.spam, test_set$yesno)
+table.tree
+
+#Resulting correctness
+#Spam ID
+table.tree[2,2]/(table.tree[2,2] + table.tree[1,2])
+#Not Spam ID
+table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
+#Overall
+(table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
+```
+The pruned tree has the same classification rules! It just gets rid of redundant splitting.
