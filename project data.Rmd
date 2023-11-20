@@ -58,7 +58,7 @@ test_set <- spam_data[-sampling_choice, ]
 # Morgan's Part:
 
 ```{r regression tree}
-#Classification tree used to predict mpg01 using all variables as predictors
+#Classification tree used to predict yesno using all variables as predictors
 tree.spam <- tree(yesno ~ ., data = train_set)
 
 #Summary that includes used variables, residual mean deviance (similar to entropy), and the training error rate (aka Misclassification error rate)
@@ -118,3 +118,194 @@ table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
 (table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
 ```
 The pruned tree has the same classification rules! It just gets rid of redundant splitting.
+
+```{r boosting}
+#setting the seed
+set.seed(1243)
+
+#(Finally figured out that the response needs to be numeric 0,1 rather than a factor) This converts yesno from a factor to a Bernoulli variable
+train_set_bern <- cbind(train_set[ , 1:6], yesno = as.numeric(train_set[ , 7]) - 1)
+test_set_bern <- cbind(test_set[ , 1:6], yesno = as.numeric(test_set[ , 7]) - 1)
+
+#Boosted tree with an interaction depth max of 1 (so, stumps) across vary shrinkage values
+
+train_error <- vector(mode = "numeric", length = 100)
+test_error <- vector(mode = "numeric", length = 100)
+
+for (shrink_value in seq(0.001, .1, by = .001)) {
+  #Fit a boosted model
+  boost.spam <- gbm(yesno ~ ., data = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000)
+  
+  #Some research makes me believe that prediction gives out the log-odds. Thus, a value <0 will be transformed to 0 and a value >0 will be transformed to 1. Note to self: Look up ?gbm.object in help for why I came to this conclusion. Look under "fit" description.
+  
+  #Training predictions
+  train.boost.pred <- 1*(predict(boost.spam, newdata = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000) > 0)
+  
+  #Training error
+  train_error[shrink_value/.001] <- sum(abs(train.boost.pred - as.numeric(train_set[ , 7]) + 1))/length(train_set[ , 7])
+  
+  #Test predictions
+  test.boost.pred <- 1*(predict(boost.spam, newdata = test_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000) > 0)
+  
+  #Test error
+  #Training error
+  test_error[shrink_value/.001] <- sum(abs(test.boost.pred - as.numeric(test_set[ , 7]) + 1))/length(test_set[ , 7])
+}
+
+plot(seq(0.001, 0.1, by = .001), test_error, xlab = "lambda")
+title("Test error, interaction level = 1")
+
+plot(seq(0.001, 0.1, by = .001), train_error, xlab = "lambda")
+title("Train error, interaction level = 1")
+```
+```{r boosting interaction level 2}
+# #setting the seed
+# set.seed(1243)
+# 
+# #(Finally figured out that the response needs to be numeric 0,1 rather than a factor) This converts yesno from a factor to a Bernoulli variable
+# train_set_bern <- cbind(train_set[ , 1:6], yesno = as.numeric(train_set[ , 7]) - 1)
+# test_set_bern <- cbind(test_set[ , 1:6], yesno = as.numeric(test_set[ , 7]) - 1)
+# 
+# #Boosted tree with an interaction depth max of 2 across vary shrinkage values
+# 
+# train_error <- vector(mode = "numeric", length = 100)
+# test_error <- vector(mode = "numeric", length = 100)
+# 
+# for (shrink_value in seq(0.001, .1, by = .001)) {
+#   #Fit a boosted model
+#   boost.spam <- gbm(yesno ~ ., data = train_set_bern, interaction.depth = 2, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000)
+#   
+#   #Some research makes me believe that prediction gives out the log-odds. Thus, a value <0 will be transformed to 0 and a value >0 will be transformed to 1. Note to self: Look up ?gbm.object in help for why I came to this conclusion. Look under "fit" description.
+#   
+#   #Training predictions
+#   train.boost.pred <- 1*(predict(boost.spam, newdata = train_set_bern, interaction.depth = 2, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000) > 0)
+#   
+#   #Training error
+#   train_error[shrink_value/.001] <- sum(abs(train.boost.pred - as.numeric(train_set[ , 7]) + 1))/length(train_set[ , 7])
+#   
+#   #Test predictions
+#   test.boost.pred <- 1*(predict(boost.spam, newdata = test_set_bern, interaction.depth = 2, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000) > 0)
+#   
+#   #Test error
+#   #Training error
+#   test_error[shrink_value/.001] <- sum(abs(test.boost.pred - as.numeric(test_set[ , 7]) + 1))/length(test_set[ , 7])
+# }
+# 
+# plot(seq(0.001, 0.1, by = .001), test_error, xlab = "lambda")
+# title("Test error, interaction level = 2")
+# 
+# plot(seq(0.001, 0.1, by = .001), train_error, xlab = "lambda")
+# title("Train error, interaction level = 2")
+```
+
+```{r}
+#Looking at test error
+min(test_error)
+max(test_error)
+median(test_error)
+
+#Looking at important variables
+summary(gbm(yesno ~ ., data = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = .01, n.trees = 1000))
+
+```
+
+```{r bagging}
+#setting the seed
+set.seed(1243)
+
+#Bagging: Recall that is is just RF with m=p which is 6 in this case
+bag.spam <- randomForest(yesno ~ ., data = train_set, mtry = 6, importance = TRUE, ntree = 1000)
+
+#The confusion matrix for the training set
+bag.spam
+
+#Predicting on the test set
+pred.test.bag <- predict(bag.spam, newdata = test_set)
+table.tree <- table(pred.test.bag, test_set$yesno)
+table.tree
+
+#Resulting correctness
+#Spam ID
+table.tree[2,2]/(table.tree[2,2] + table.tree[1,2])
+#Not Spam ID
+table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
+#Overall
+(table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
+
+#Finding what variables are important
+importance(bag.spam)
+varImpPlot(bag.spam)
+
+```
+
+    
+```{r RF pre}
+#Number of predictors
+num_p <- length(spam_data[1, ]) - 1
+
+#sqrt{p}
+
+sqrt(num_p)
+
+#p/3
+
+num_p/3
+```
+Thus, we can try RF with m=2 and m=3, and look at the performance.
+
+```{r RF}
+#setting the seed
+set.seed(1243)
+
+#RF with 2 predictors
+rf2.spam <- randomForest(yesno ~ ., data = train_set, mtry = 2, importance = TRUE, ntree = 1000)
+
+#The confusion matrix for the training set
+bag.spam
+
+#Predicting on the test set
+pred.test.rf2 <- predict(rf2.spam, newdata = test_set)
+table.tree <- table(pred.test.rf2, test_set$yesno)
+table.tree
+
+#Resulting correctness
+#Spam ID
+table.tree[2,2]/(table.tree[2,2] + table.tree[1,2])
+#Not Spam ID
+table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
+#Overall
+(table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
+
+#Finding what variables are important
+importance(rf2.spam)
+varImpPlot(rf2.spam)
+```
+
+```{r}
+#setting the seed
+set.seed(1243)
+
+#RF with 2 predictors
+rf3.spam <- randomForest(yesno ~ ., data = train_set, mtry = 3, importance = TRUE, ntree = 1000)
+
+#The confusion matrix for the training set
+bag.spam
+
+#Predicting on the test set
+pred.test.rf3 <- predict(rf3.spam, newdata = test_set)
+table.tree <- table(pred.test.rf3, test_set$yesno)
+table.tree
+
+#Resulting correctness
+#Spam ID
+table.tree[2,2]/(table.tree[2,2] + table.tree[1,2])
+#Not Spam ID
+table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
+#Overall
+(table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
+
+#Finding what variables are important
+importance(rf3.spam)
+varImpPlot(rf3.spam)
+
+```
