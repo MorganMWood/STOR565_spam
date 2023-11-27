@@ -134,7 +134,7 @@ test_error <- vector(mode = "numeric", length = 100)
 
 for (shrink_value in seq(0.001, .1, by = .001)) {
   #Fit a boosted model
-  boost.spam <- gbm(yesno ~ ., data = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000)
+  boost.spam <- gbm(yesno ~ ., data = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000, cv.folds = 5)
   
   #Some research makes me believe that prediction gives out the log-odds. Thus, a value <0 will be transformed to 0 and a value >0 will be transformed to 1. Note to self: Look up ?gbm.object in help for why I came to this conclusion. Look under "fit" description.
   
@@ -148,14 +148,61 @@ for (shrink_value in seq(0.001, .1, by = .001)) {
   test.boost.pred <- 1*(predict(boost.spam, newdata = test_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000) > 0)
   
   #Test error
-  #Training error
   test_error[shrink_value/.001] <- sum(abs(test.boost.pred - as.numeric(test_set[ , 7]) + 1))/length(test_set[ , 7])
+
 }
 
 plot(seq(0.001, 0.1, by = .001), test_error, xlab = "lambda")
 title("Test error, interaction level = 1")
 
 plot(seq(0.001, 0.1, by = .001), train_error, xlab = "lambda")
+title("Train error, interaction level = 1")
+```
+
+```{r boosting w CV}
+#setting the seed
+set.seed(1243)
+
+#(Finally figured out that the response needs to be numeric 0,1 rather than a factor) This converts yesno from a factor to a Bernoulli variable
+train_set_bern <- cbind(train_set[ , 1:6], yesno = as.numeric(train_set[ , 7]) - 1)
+test_set_bern <- cbind(test_set[ , 1:6], yesno = as.numeric(test_set[ , 7]) - 1)
+
+#Boosted tree with an interaction depth max of 1 (so, stumps) across vary shrinkage values
+
+train_error <- vector(mode = "numeric", length = 10)
+test_error <- vector(mode = "numeric", length = 10)
+cv_error <- vector(mode = "numeric", length = 10)
+
+for (shrink_value in seq(0.01, .1, by = .01)) {
+  #Fit a boosted model
+  boost.spam <- gbm(yesno ~ ., data = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000, cv.folds = 5)
+  
+  #Some research makes me believe that prediction gives out the log-odds. Thus, a value <0 will be transformed to 0 and a value >0 will be transformed to 1. Note to self: Look up ?gbm.object in help for why I came to this conclusion. Look under "fit" description.
+  
+  #Training predictions
+  train.boost.pred <- 1*(predict(boost.spam, newdata = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000) > 0)
+  
+  #Training error
+  train_error[shrink_value/.01] <- sum(abs(train.boost.pred - as.numeric(train_set[ , 7]) + 1))/length(train_set[ , 7])
+  
+  #CV Error
+  cv_error[shrink_value/.01] <- mean(boost.spam$cv.error)
+  
+  #Test predictions
+  test.boost.pred <- 1*(predict(boost.spam, newdata = test_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000) > 0)
+  
+  #Test error
+  test_error[shrink_value/.01] <- sum(abs(test.boost.pred - as.numeric(test_set[ , 7]) + 1))/length(test_set[ , 7])
+
+}
+
+plot(seq(0.01, 0.1, by = .01), test_error, xlab = "lambda")
+title("Test error, interaction level = 1")
+
+plot(seq(0.01, 0.1, by = .01), cv_error, xlab = "lambda")
+title("CV error, interaction level = 1")
+
+plot(seq(0.01, 0.1, by = .01), train_error, xlab = "lambda")
 title("Train error, interaction level = 1")
 ```
 
@@ -205,8 +252,26 @@ min(test_error)
 max(test_error)
 median(test_error)
 
+#Using shrinkage level .06 (found using cv)
+boost.spam.06 <- gbm(yesno ~ ., data = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = .06, n.trees = 1000)
+
 #Looking at important variables
-summary(gbm(yesno ~ ., data = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = .01, n.trees = 1000))
+summary(boost.spam.06)
+
+#Predicting the classification of the test_set using the boosted tree
+tree.predict.spam <- 1*(predict(boost.spam.06, newdata = test_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = .06, n.trees = 1000) > 0)
+
+#Resulting table of prediction vs true values
+table.tree <- table(tree.predict.spam, test_set$yesno)
+table.tree
+
+#Resulting correctness
+#Spam ID
+table.tree[2,2]/(table.tree[2,2] + table.tree[1,2])
+#Not Spam ID
+table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
+#Overall
+(table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
 
 ```
 
