@@ -12,6 +12,7 @@ library(tree)
 library(randomForest)
 library(gbm)
 library(class)
+library(tidyverse)
 ```
 
 ```{r completeload}
@@ -41,6 +42,7 @@ obs_num <- length(spam_data[ , 1])
 sampling_choice <- sample(1:obs_num, size = floor(obs_num/2))
 train_set <- spam_data[sampling_choice, ]
 test_set <- spam_data[-sampling_choice, ]
+train_set
 ```
 
 
@@ -103,6 +105,50 @@ confusion_matrix <- table(predictions, test_set$yesno)
 print(confusion_matrix)
 library(pROC)
 roc_curve <- roc(response = as.numeric(test_set$yesno), predictor = as.numeric(predictions))
+plot(roc_curve)
+
+```
+
+
+```{r}
+# KNN
+pred <- c("crl.tot", "dollar", "bang", "money", "n000", "make")
+cands.K <- seq(1, 100)
+ncv <- 10
+n <- nrow(train_set)
+set.seed(1)
+shuffle <- sample.int(n)
+shuffle <- cut(shuffle, breaks = ncv, labels = 1:ncv)
+spam.knn.pred.cv <- list()
+spam.knn.cv.mse <- numeric()
+# Check for missing values in predictor variables
+if (any(is.na(train_set[shuffle != fold, pred]))) {
+  stop("Missing values found in predictor variables.")
+}
+
+# Check for missing values in the response variable
+if (any(is.na(train_set[shuffle != fold, "yesno"]))) {
+  stop("Missing values found in the response variable.")
+}
+for (k in 1:length(cands.K)) {
+  spam.knn.pred.cv[[k]] <- factor(rep(NA, n), levels = levels(train_set$yesno))
+  for (fold in 1:ncv) {
+    spam.knn.pred.cv[[k]][shuffle == fold] <-
+      knn(train_set[shuffle != fold, pred],
+          train_set[shuffle == fold, pred],
+          train_set[shuffle != fold, "yesno"],
+          cands.K[k])
+  }
+  spam.knn.cv.mse[k] <- mean(train_set$yesno != spam.knn.pred.cv[[k]])
+}
+
+spam.knn.pred <- knn(train_set[pred], test_set[pred], train_set$yesno, k = cands.K[which.min(spam.knn.cv.mse)])
+spam.knn.pred <- knn(train_set[pred], test_set[pred], train_set$yesno, k = cands.K[which.min(spam.knn.cv.mse)])
+predictions <- as.numeric(spam.knn.pred)
+confusion_matrix <- table(predictions, test_set$yesno)
+print(confusion_matrix)
+library(pROC)
+roc_curve <- roc(response = as.numeric(test_set$yesno), predictor = predictions)
 plot(roc_curve)
 
 ```
