@@ -102,7 +102,7 @@ We now consider the predictive performance of tree-based methods. The following 
 
 The models are presented in increasing prediction performance.
 
-*Classification Trees* We begin by training a pruned classification tree as displayed in Figure \ref{fig:classtree} where 'y' stands for a spam classification and 'n' stands for a non-spam classification. We find that the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$" are important classifiers, with the length of all-capital strings being the most important. For each of these variables, larger values suggest that an email should be classified as spam.
+*Classification Trees* We begin by training a pruned classification tree as displayed in Figure \ref{fig:classtree} where 'y' stands for a spam classification and 'n' stands for a non-spam classification. We find that the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$" are important classifiers, with the frequency of the dollar symbol being the most important. Just as intuition would suggest, for each of these variables, larger values suggest that an email should be classified as spam.
 
 ```{r classification tree, include=FALSE}
 #Classification tree used to predict yesno using all variables as predictors
@@ -155,7 +155,9 @@ title(main = "Pruned Classification Tree")
 
 <center> **Figure  1.**\label{fig:classtree} Pruned classification tree which uses the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$". Here 'y' stands for classifying an email as spam and 'n' stands for classifying an email as non-spam. </center> \n
 
-For the classification tree displayed above, the tree was grown using deviance and then pruned using misclassification. The performance of the classification tree in Figure \ref{fig:classtree} is summarized in Table \ref{table:classtree}. 
+For the classification tree displayed above, the tree was grown using deviance and then pruned using misclassification. The performance of the classification tree in Figure \ref{fig:classtree} is summarized in Table \ref{table:classtree}. In total, 84.2% of the test observations were correctly classified. Of the spam observations, 74.7% were correctly classified as spam. Of the non-spam observations, 90.4% were correctly classified as non-spam.
+
+It is worth pointing out that the accuracy of this model is near 85% while also being interpretable and, arguably, very simple.
 
 ```{r pruned_tree_performance table, echo = FALSE}
 #Predicting the classification of the test_set using the pruned tree
@@ -163,9 +165,9 @@ tree.predict.spam <- predict(pruned.tree.spam, test_set, type = "class")
 
 #Resulting table of prediction vs true values
 table.tree <- table(tree.predict.spam, test_set$yesno)
-table.tree
+gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Class_nonspam", "Class_spam")), rownames_to_stub = TRUE)
 ```
-<center> **Table  1.**\label{table:classtree} Contingency table displaying the predicted verses true classification of emails in the test set. </center> \n
+<center> **Table  1.**\label{table:classtree} Contingency table displaying the predicted verses true classification of emails in the test set using the pruned classification tree in Figure 1. </center> \n
 
 ```{r pruned_tree_performance, include=FALSE}
 #Resulting correctness
@@ -176,3 +178,5 @@ table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
 #Overall
 (table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
 ```
+
+*Boosting Trees* We next
