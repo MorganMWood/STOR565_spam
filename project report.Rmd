@@ -98,7 +98,59 @@ Our code can be found at the end of this document.
 
 # Variables \label{sec:variables}
 
-Perhaps explain each variable and then some basic exploratory analysis (maybe just give a correlation matrix for first 6 variables?).
+To distinguish between spam and non-spam emails, we utilized six key variables:
+
+*crl.tot (Total Capitalization)*
+
+Definition: The cumulative length of words in all capital letters within a given email.
+
+Significance: Reflects the extent of capitalization, which is often a characteristic in spam emails.
+
+*dollar (Dollar Sign Occurrences)*
+
+Definition: The frequency of the "$" character expressed as a percentage of the total characters in a given email.
+
+Significance: Indicates the prevalence of monetary symbols, commonly found in spam emails promoting financial scheme or other related content.
+
+*bang (Exclamation Mark Occurrences)*
+
+Definition: The frequency of the "!" character expressed as a percentage of the total characters in a given email.
+
+Significance: Highlights the usage of exclamation marks, a common feature in attention-grabbing spam content.
+
+*money (Occurrences of the Word "Money")*
+
+Definition: The frequency of the word "money" expressed as a percentage of the total words in a given email.
+
+Significance: Identifies instances where the word "money" is prominently featured, often associated with spam content.
+
+*n000 (Occurrences of the String "000")*
+
+Definition: The frequency of the string "000" expressed as a percentage of the total words in a given email.
+
+Significance: Captures patterns related to numerical sequences, a characteristic often exploited in spam messages.
+
+*make (Occurrences of the Word "Make")*
+
+Definition: The frequency of the word "make" expressed as a percentage of the total words in a given email.
+
+Significance: Highlights instances where the word "make" is overrepresented, a potential indicator of spam language.
+
+*Final Thoughts* These variables collectively serve as effective predictors for discerning the likelihood of an email being spam. An examination of these features in multiple spam emails consistently reveals patterns reflected in the correlation matrix below:
+
+```{r, echo = FALSE}
+library(gt)
+numeric_variables <- sapply(spam_data, is.numeric)
+cor_matrix <- cor(spam_data[, numeric_variables])
+cor_table <- gt(as.data.frame(cor_matrix)) %>%
+  tab_spanner(
+    label = "Correlation Matrix"
+  ) %>%
+  fmt_number(columns = everything(), decimals = 2)  # Format numbers to two decimals
+cor_table
+
+```
+<center> **Table  1.**\label{table:corvar} Correlation matrix of all predictive variables used in our models. </center> \n
 
 # Logistic Regression
 
