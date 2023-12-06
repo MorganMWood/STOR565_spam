@@ -102,7 +102,169 @@ Perhaps explain each variable and then some basic exploratory analysis.
 
 # Logistic Regression
 
+We began our analysis by employing a logistic regression model to discern patterns indicative of spam, using all predictors available in our dataset. According to the summary output of this logistic model as shown in **Table 1**, it is evident that most of the predictor variables, including total length of words in capital letter, frequencies of dollar symbol `$` , bang symbol `!`, the word `money`, and string `000`, in the model are statistically significant, as indicated by their small p-values. This significance suggests that these variables play a crucial role in determining whether an email is spam.  However, a notable exception is the `make` predictor which indicates the frequency of the word `make`.  Its large p-value indicates that this predictor does not contribute significantly to the model in differentiating spam from non-spam emails. 
+
+```{r logistic_model_estimates, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+
+lmod <- glm(yesno ~., data = train_set, family = binomial)
+model_summary <- summary(lmod)
+coef_table <- model_summary$coefficients
+
+knitr::kable(coef_table)
+```
+
+<center> **Table  1.**\label{table:logistic} Table displaying the estimates in the logistic model using all predictors in the dataset. </center> \n
+
+In order to enhance our logistic model performance, we then employed a stepwise selection procedure. This method allowed us to identify and retain the most impactful features in the model. The stepwise selection process resulted in an optimal model, where the predictor `make` was excluded. As shown in **Table  2**, all remaining predictors were statistically significant. 
+
+```{r optimized-model-summary, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(MASS)
+
+lmod_step <- stepAIC(lmod, direction = "both", trace = FALSE)
+optimized_model_summary <- summary(lmod_step)
+optimized_coef_table <- optimized_model_summary$coefficients
+
+knitr::kable(optimized_coef_table)
+```
+
+<center> **Table  2.**\label{table:logistic} Table displaying the estimates in the optimized logistic model after stepwise selection process. </center> \n
+
+To evaluate the performance of our optimized logistic model, we applied it to the test dataset. This involved generating predictions and comparing them against actual outcomes to assess the model's accuracy and error rates. As shown in **Table  3**, the optimized logistic model achieved an accuracy of 82.96%. The True Positive Rate reflects that the model correctly identify 65.78% spam emails, and the True Negative Rate of 94.06% is notably high, demonstrating the model's proficiency in correctly identifying non-spam emails.
+
+```{r Logistic performance on test set, include=FALSE}
+test_pred_prob <- predict(lmod_step, newdata = test_set, type = "response")
+test_pred_class <- ifelse(test_pred_prob > 0.5, "y", "n")
+
+table_test <- table(Predicted = test_pred_class, Actual = test_set$yesno)
+
+accuracy_test <- sum(diag(table_test)) / sum(table_test)
+
+TP_test <- table_test[2,2] # True Positives
+TN_test <- table_test[1,1] # True Negatives
+FP_test <- table_test[2,1] # False Positives
+FN_test <- table_test[1,2] # False Negatives
+
+TPR_test <- TP_test / (TP_test + FN_test) # True Positive Rate
+TNR_test <- TN_test / (TN_test + FP_test) # True Negative Rate
+
+cat("Accuracy:", accuracy_test, "\n")
+cat("True Positive Rate:", TPR_test, "\n")
+cat("True Negative Rate:", TNR_test, "\n")
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+performance_metrics <- data.frame(
+  Measure = c("Test Accuracy", "Correct Spam", "Correct Non-Spam"),
+  Score = c(accuracy_test, TPR_test, TNR_test)
+)
+
+knitr::kable(performance_metrics)
+```
+
+<center> **Table  3.**\label{table:logistic} Table displaying the test accuracy, true positive rate and true nagetive rate of the optimized logistic model. </center> \n
+
+To further assess the performance of our optimized logistic regression model, we generated a ROC curve. The ROC curve for our optimized logistic model, as shown in **Figure  1**, is observed to be well above the diagonal line which represents the performance of a completely random classifier, characterized by an AUC of 0.5. Additionally, our model's ROC curve shows an AUC substantially higher than 0.5, which is an indicator of good predictive power.
+
+```{r Logistic-ROC, echo=FALSE, message=FALSE, warning=FALSE}
+library(pROC)
+roc_test <- roc(test_set$yesno, test_pred_prob)
+plot(roc_test, main="ROC Curve for Logistic Model", col="blue")
+```
+
+<center> **Figure  1.**\label{fig:logistic} The ROC curve outperforms the diagonal representing a random classifier, indicating the logistic model's effective discrimination between spam and non-spam emails. </center> \n
+
 # Naïve Bayes
+
+In this section, we extended our analysis to include a Naïve Bayes classifier. According to the Naïve Bayes results as shown in **Table  4**, spam emails typically feature longer sequences of capital letters, more frequent mentions of money-related terms like dollar sign `$` and word `money`, and larger numerical figures, all consistent with common spam characteristics. The word `make` does not significantly differentiate between spam and non-spam, suggesting it's not a reliable feature for spam detection in this context, which is the same result as the logistic model we found in previous section. 
+
+```{r Naive Bayes, include=FALSE}
+library(e1071)
+
+nb_mod <- naiveBayes(yesno ~ ., data = train_set)
+nb_mod
+```
+
+```{r, echo=FALSE}
+library(knitr)
+
+conditional_probabilities <- data.frame(
+  Feature = rep(c("crl.tot", "dollar", "bang", "money", "n000", "make"), each = 2),
+  Class = c("n", "y", "n", "y", "n", "y", "n", "y", "n", "y", "n", "y"),
+  Mean = c(163.6245, 492.6692, 
+           0.009777698, 0.175452747, 
+           0.1023986, 0.4972802, 
+           0.01180576, 0.20468132, 
+           0.007597122, 0.260021978, 
+           0.07404317, 0.16031868),
+  SD = c(353.9725, 903.5050, 
+         0.05134497, 0.33529176, 
+         0.9358777, 0.7548440, 
+         0.1115096, 0.4713259, 
+         0.07804936, 0.52941818, 
+         0.3064346, 0.2995090)
+)
+
+knitr::kable(conditional_probabilities, 
+             align = 'c')
+```
+
+<center> **Table  4.**\label{table:naive bayes} Table displaying the conditional probabiliteis of the Naïve Bayes model. </center> \n
+
+Based on the conclusion we got from the first Naïve Bayes regression, we decided to discard the predictor `make` which is not a impactful feature to detect spam emails. We then fit a new Naïve Bayes model excluding the `make` predictor and then test this new model on the test dataset. As shown in **Table  5**, our new Naïve Bayes demonstrated a test accuracy of 77.3% which is slightly lower than that of logistic model. However, its True Negative Rate of 95.4% highlights a strong ability to accurately recognize non-spam emails, while its True Positive Rate of 49.3% suggests moderate success in correctly identifying spam. 
+
+```{r Naive Bayes2, include=FALSE}
+library(e1071)
+
+nb_mod2 <- naiveBayes(yesno ~ crl.tot + dollar + bang + money + n000, data = train_set)
+nb_mod2
+```
+
+```{r Naive Bayes performance on test set, include=FALSE}
+test_pred <- predict(nb_mod2, newdata = test_set, type = "class")
+
+# Create a confusion matrix
+conf_mat <- table(Predicted = test_pred, Actual = test_set$yesno)
+
+test_accuracy_nb <- sum(diag(conf_mat)) / sum(conf_mat)
+
+TP_test_nb <- conf_mat[2,2] # True Positives
+TN_test_nb <- conf_mat[1,1] # True Negatives
+FP_test_nb <- conf_mat[2,1] # False Positives
+FN_test_nb <- conf_mat[1,2] # False Negatives
+
+TPR_test_nb <- TP_test_nb / (TP_test_nb + FN_test_nb) # True Positive Rate
+TNR_test_nb <- TN_test_nb / (TN_test_nb + FP_test_nb) # True Negative Rate
+
+cat("Test accuracy:", test_accuracy_nb, "\n")
+cat("True Positive Rate:", TPR_test_nb, "\n")
+cat("True Negative Rate:", TNR_test_nb, "\n")
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+performance_metrics_nb <- data.frame(
+  Measure = c("Test Accuracy", "Correct Spam", "Correct Non-Spam"),
+  Score = c(test_accuracy_nb, TPR_test_nb, TNR_test_nb)
+)
+
+knitr::kable(performance_metrics_nb)
+```
+
+<center> **Table  5.**\label{table:naive bayes} Table displaying the test accuracy, true positive rate and true nagetive rate of the Naïve Bayes model. </center> \n
+
+We then generated the ROC curve for Naïve Bayes model, as shown in **Figure  2**. The curve is observed to be well above the diagonal line, and it shows an AUC higher than 0.5, which is an indicator of good predictive power.
+
+```{r Naïve Bayes-ROC, echo=FALSE, message=FALSE, warning=FALSE}
+test_prob <- predict(nb_mod2, newdata = test_set, type = "raw")[, 2] 
+
+roc_obj <- roc(as.factor(test_set$yesno), test_prob)
+
+plot(roc_obj, main="ROC Curve for Naive Bayes Model", col="blue")
+```
+
+<center> **Figure  2.**\label{fig:naive bayes} The ROC curve for Naïve Bayes model outperforms the diagonal representing a random classifier. </center> \n
+
 
 # Support Vector Machines (Non-Linear and Linear)
 
