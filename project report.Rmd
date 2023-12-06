@@ -88,7 +88,7 @@ Within this report we aim to provide evidence that the classification of spam em
 
 Regarding to the above machine learning algorithms, Naïve Bayes and Logistic Regression allowed us for efficient handling of large datasets and provided clear interpretability. LDA & QDA helped us understand the complex patterns in emails. KNN was used for its simplicity in similarity-based classification. SVMs adeptly managed the high-dimensional nature of text data. Finally, tree-based methods offered deep insights into intricate feature interactions.
 
-To classify emails as either spam or non-spam, we consider a dataset provided by the TidyTuesday Project^[https://github.com/rfordatascience/tidytuesday/tree/979c7204bb80fd3a00ca1b622de7ebd0f49766bf/data/2023/2023-08-15]. We will refer to this dataset as the Spam Dataset for the remainder of this report. The Spam Dataset contains the classification of 4601 emails as either spam or non-spam, and provides information on each email in the form of 6 variables which describe the relative frequency of certain words or characters. We describe these variables in detail Section \ref{sec:variables}. Of the 4601 emails, 1813 are spam observations and 2788 are non-spam observations resulting in an approximately 40:60 split.
+To classify emails as either spam or non-spam, we consider a dataset provided by the TidyTuesday Project^[https://github.com/rfordatascience/tidytuesday/tree/979c7204bb80fd3a00ca1b622de7ebd0f49766bf/data/2023/2023-08-15]. We will refer to this dataset as the Spam Dataset for the remainder of this report. The Spam Dataset contains the classification of 4601 emails as either spam or non-spam, and provides information on each email in the form of 6 variables which describe the relative frequency of certain words or characters. We describe these variables in detail Section 2. Of the 4601 emails, 1813 are spam observations and 2788 are non-spam observations resulting in an approximately 40:60 split.
 
 The Spam Dataset is a subset of the Spam E-mail Database^[https://search.r-project.org/CRAN/refmans/kernlab/html/spam.html] distributed by R and collected by Hewlett-Packard Labs. In contrast to the Spam Dataset, the Spam E-mail Database contains 57 variables on the same 4601 emails. The Spam Dataset uses 6 variables on the total frequency of various words and characters along with 2 variables related to word and character length from the Spam E-mail Database to instead only display 6 variables on relative frequency.
 
@@ -98,7 +98,7 @@ Our code can be found at the end of this document.
 
 # Variables \label{sec:variables}
 
-Perhaps explain each variable and then some basic exploratory analysis.
+Perhaps explain each variable and then some basic exploratory analysis (maybe just give a correlation matrix for first 6 variables?).
 
 # Logistic Regression
 
