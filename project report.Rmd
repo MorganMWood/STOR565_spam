@@ -159,13 +159,13 @@ For the classification tree displayed above, the tree was grown using deviance a
 
 It is worth pointing out that the accuracy of this model is near 85% while also being interpretable and, arguably, very simple.
 
-```{r pruned_tree_performance table, echo = FALSE}
+```{r pruned_tree_performance_table, echo = FALSE}
 #Predicting the classification of the test_set using the pruned tree
 tree.predict.spam <- predict(pruned.tree.spam, test_set, type = "class")
 
 #Resulting table of prediction vs true values
 table.tree <- table(tree.predict.spam, test_set$yesno)
-gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Class_nonspam", "Class_spam")), rownames_to_stub = TRUE)
+gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
 ```
 <center> **Table  1.**\label{table:classtree} Contingency table displaying the predicted verses true classification of emails in the test set using the pruned classification tree in Figure 1. </center> \n
 
@@ -179,4 +179,199 @@ table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
 (table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
 ```
 
-*Boosting Trees* We next
+*Boosting Trees* We next consider boosting trees. Multiple shrinkage values were considered and in each model 1000 stumps were used (i.e., 1000 trees of interaction level 1). We present results for a shrinkage value of 0.06 which was chosen using cross validation. <!--- We will then present a plot of training, cross validation, and test error for other shrinkage values subsequently. --->
+
+```{r boosting w CV, include = FALSE}
+#setting the seed
+set.seed(1243)
+
+#(Finally figured out that the response needs to be numeric 0,1 rather than a factor) This converts yesno from a factor to a Bernoulli variable
+train_set_bern <- cbind(train_set[ , 1:6], yesno = as.numeric(train_set[ , 7]) - 1)
+test_set_bern <- cbind(test_set[ , 1:6], yesno = as.numeric(test_set[ , 7]) - 1)
+
+#Boosted tree with an interaction depth max of 1 (so, stumps) across vary shrinkage values
+
+train_error <- vector(mode = "numeric", length = 10)
+test_error <- vector(mode = "numeric", length = 10)
+cv_error <- vector(mode = "numeric", length = 10)
+
+for (shrink_value in seq(0.01, .1, by = .01)) {
+  #Fit a boosted model
+  boost.spam <- gbm(yesno ~ ., data = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000, cv.folds = 5)
+  
+  #Some research makes me believe that prediction gives out the log-odds. Thus, a value <0 will be transformed to 0 and a value >0 will be transformed to 1. Note to self: Look up ?gbm.object in help for why I came to this conclusion. Look under "fit" description.
+  
+  #Training predictions
+  train.boost.pred <- 1*(predict(boost.spam, newdata = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000) > 0)
+  
+  #Training error
+  train_error[shrink_value/.01] <- sum(abs(train.boost.pred - as.numeric(train_set[ , 7]) + 1))/length(train_set[ , 7])
+  
+  #CV Error
+  cv_error[shrink_value/.01] <- mean(boost.spam$cv.error)
+  
+  #Test predictions
+  test.boost.pred <- 1*(predict(boost.spam, newdata = test_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = shrink_value, n.trees = 1000) > 0)
+  
+  #Test error
+  test_error[shrink_value/.01] <- sum(abs(test.boost.pred - as.numeric(test_set[ , 7]) + 1))/length(test_set[ , 7])
+
+}
+
+plot(seq(0.01, 0.1, by = .01), test_error, xlab = "lambda")
+title("Test error, interaction level = 1")
+
+plot(seq(0.01, 0.1, by = .01), cv_error, xlab = "lambda")
+title("CV error, interaction level = 1")
+
+plot(seq(0.01, 0.1, by = .01), train_error, xlab = "lambda")
+title("Train error, interaction level = 1")
+```
+
+```{r boosting error, include = FALSE}
+#Looking at test error
+min(test_error)
+max(test_error)
+median(test_error)
+
+#Using shrinkage level .06 (found using cv)
+boost.spam.06 <- gbm(yesno ~ ., data = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = .06, n.trees = 1000)
+
+#Looking at important variables
+summary(boost.spam.06)
+
+#Predicting the classification of the test_set using the boosted tree
+tree.predict.spam <- 1*(predict(boost.spam.06, newdata = test_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = .06, n.trees = 1000) > 0)
+
+#Resulting table of prediction vs true values
+table.tree <- table(tree.predict.spam, test_set$yesno)
+table.tree
+
+#Resulting correctness
+#Spam ID
+table.tree[2,2]/(table.tree[2,2] + table.tree[1,2])
+#Not Spam ID
+table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
+#Overall
+(table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
+
+```
+
+For a boosted tree with shrinkage value 0.06, we first look at the performance of this model which is displayed in Table 2 \ref{table:boosting}. In total, 86.4% of the test observations were correctly classified. Of the spam observations, 78.1% were correctly classified as spam. Of the non-spam observations, 91.8% were correctly classified as non-spam.
+
+```{r boosting_performance_table, echo = FALSE}
+#Resulting table of prediction vs true values
+gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
+```
+<center> **Table  2.**\label{table:boosting} Contingency table displaying the predicted verses true classification of emails in the test set using a boosting tree trained using shrinkage value 0.06 and 1000 stumps. </center> \n
+
+We next consider the relative influence of variables. This is displayed below in Figure 2\ref{fig:influence}. We find similarly to our pruned tree analysis that the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$" are important classifiers. However, our boosting tree suggests that the frequency of the exclamation mark is the most important variable in classification.
+
+```{r importance_plot, echo=FALSE}
+#Looking at important variables
+summary(boost.spam.06)
+```
+<center> **Figure 2.**\label{fig:influence} Figure displaying the relative influence of different predictive variables on classification listed from most (top) to least (bottom) influential. </center> \n
+
+<!--- Finally, we present the training, cross validation, and test error below in Figure 3 \ref{fig:shrinkage}. As noted, the results in Table 2 \ref{table:boosting} and Figure 2 \ref{fig:influence} are from the model with a shrinkage value of 0.06. 
+
+
+```{r shrinkage_plots, echo=FALSE}
+plot(seq(0.01, 0.1, by = .01), train_error, xlab = "lambda")
+title("Training set error")
+
+plot(seq(0.01, 0.1, by = .01), cv_error, xlab = "lambda")
+title("CV error")
+
+plot(seq(0.01, 0.1, by = .01), test_error, xlab = "lambda")
+title("Test set error")
+```
+<center> **Figure 2.**\label{fig:influence} Figure displaying the training, cross validation, and test error for different shrinkage values. </center> \n
+
+--->
+
+
+*Bagging Trees* We next consider bagging trees. We turn to a more general version of random forest following this analysis. 
+
+To train our bagging tree model, we used 1000 trees. The performance is summarized below in Table 3 \ref{table:bagging}. In total, 86.4% of the test observations were correctly classified. Of the spam observations, 81.2% were correctly classified as spam. Of the non-spam observations, 89.8% were correctly classified as non-spam.
+
+```{r bagging, include=FALSE}
+#setting the seed
+set.seed(1243)
+
+#Bagging: Recall that is is just RF with m=p which is 6 in this case
+bag.spam <- randomForest(yesno ~ ., data = train_set, mtry = 6, importance = TRUE, ntree = 1000)
+
+#The confusion matrix for the training set
+bag.spam
+
+#Predicting on the test set
+pred.test.bag <- predict(bag.spam, newdata = test_set)
+table.tree <- table(pred.test.bag, test_set$yesno)
+table.tree
+
+#Resulting correctness
+#Spam ID
+table.tree[2,2]/(table.tree[2,2] + table.tree[1,2])
+#Not Spam ID
+table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
+#Overall
+(table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
+
+#Finding what variables are important
+importance(bag.spam)
+varImpPlot(bag.spam)
+
+```
+
+```{r bagging_performance_table, echo = FALSE}
+#Resulting table of prediction vs true values
+gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
+```
+<center> **Table  2.**\label{table:bagging} Contingency table displaying the predicted verses true classification of emails in the test set using a bagging tree trained using 1000 trees. </center> \n
+
+Using the bagging tree trained, we also looked at the influence of each of the respective variables. We suppress the numerics here as the results agree with the order of influence described in Figure 2\ref{fig:influence}.
+
+*Random Forest* We next consider training random forest models with either two or three predictors in 1000 trees. Note that we have a total of six predictor variables. We use the rule of thumb that the square root of the number of predictor variables is a good number of predictors to use in each tree. The square root of six is approximately 2.5.
+
+For this report, we give results based on the random forest model trained with two predictors as it slightly outperforms the model trained with three predictors which resulted in a total classification accuracy of 87.4%.
+
+In Figure 4 \ref{fig:rf}, the performance of the random forest model trained with two predictors in each tree is displayed.  In total, 88.0% of the test observations were correctly classified. Of the spam observations, 78.5% were correctly classified as spam. Of the non-spam observations, 94.1% were correctly classified as non-spam.
+
+```{r RF2, include=FALSE}
+#setting the seed
+set.seed(1243)
+
+#RF with 2 predictors
+rf2.spam <- randomForest(yesno ~ ., data = train_set, mtry = 2, importance = TRUE, ntree = 1000)
+
+#The confusion matrix for the training set
+bag.spam
+
+#Predicting on the test set
+pred.test.rf2 <- predict(rf2.spam, newdata = test_set)
+table.tree <- table(pred.test.rf2, test_set$yesno)
+table.tree
+
+#Resulting correctness
+#Spam ID
+table.tree[2,2]/(table.tree[2,2] + table.tree[1,2])
+#Not Spam ID
+table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
+#Overall
+(table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
+
+#Finding what variables are important
+importance(rf2.spam)
+varImpPlot(rf2.spam)
+```
+
+```{r rf_performance_table, echo = FALSE}
+#Resulting table of prediction vs true values
+gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
+```
+<center> **Table  4.**\label{table:bagging} Contingency table displaying the predicted verses true classification of emails in the test set using a random forest model trained using 1000 trees with two predictors each. </center> \n
+
+Using the random forest trained, we again looked at the influence of each of the respective variables. As before, we suppress the numerics as the results agree with the order of influence described in Figure 2\ref{fig:influence}.
+
+

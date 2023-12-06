@@ -885,10 +885,10 @@ text-indent: 25px;
     </tr>
   </thead>
   <tbody class="gt_table_body">
-    <tr><th id="stub_1_1" scope="row" class="gt_row gt_left gt_stub">Class_nonspam</th>
+    <tr><th id="stub_1_1" scope="row" class="gt_row gt_left gt_stub">Classified_nonspam</th>
 <td headers="stub_1_1 Truth_nonspam" class="gt_row gt_right">1264</td>
 <td headers="stub_1_1 Truth_spam" class="gt_row gt_right">229</td></tr>
-    <tr><th id="stub_1_2" scope="row" class="gt_row gt_left gt_stub">Class_spam</th>
+    <tr><th id="stub_1_2" scope="row" class="gt_row gt_left gt_stub">Classified_spam</th>
 <td headers="stub_1_2 Truth_nonspam" class="gt_row gt_right">134</td>
 <td headers="stub_1_2 Truth_spam" class="gt_row gt_right">674</td></tr>
   </tbody>
@@ -902,7 +902,1321 @@ verses true classification of emails in the test set using the pruned
 classification tree in Figure 1.
 </center>
 <p></p>
-<p><em>Boosting Trees</em> We next</p>
+<p><em>Boosting Trees</em> We next consider boosting trees. Multiple
+shrinkage values were considered and in each model 1000 stumps were used
+(i.e., 1000 trees of interaction level 1). We present results for a
+shrinkage value of 0.06 which was chosen using cross validation.
+<!--- We will then present a plot of training, cross validation, and test error for other shrinkage values subsequently. ---></p>
+<p>For a boosted tree with shrinkage value 0.06, we first look at the
+performance of this model which is displayed in Table 2 <span class="math inline">\(\ref{table:boosting}\)</span>. In total, 86.4% of
+the test observations were correctly classified. Of the spam
+observations, 78.1% were correctly classified as spam. Of the non-spam
+observations, 91.8% were correctly classified as non-spam.</p>
+<div id="butuxyolid" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#butuxyolid table {
+font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+#butuxyolid thead, #butuxyolid tbody, #butuxyolid tfoot, #butuxyolid tr, #butuxyolid td, #butuxyolid th {
+border-style: none;
+}
+#butuxyolid p {
+margin: 0;
+padding: 0;
+}
+#butuxyolid .gt_table {
+display: table;
+border-collapse: collapse;
+line-height: normal;
+margin-left: auto;
+margin-right: auto;
+color: #333333;
+font-size: 16px;
+font-weight: normal;
+font-style: normal;
+background-color: #FFFFFF;
+width: auto;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #A8A8A8;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #A8A8A8;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+}
+#butuxyolid .gt_caption {
+padding-top: 4px;
+padding-bottom: 4px;
+}
+#butuxyolid .gt_title {
+color: #333333;
+font-size: 125%;
+font-weight: initial;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-color: #FFFFFF;
+border-bottom-width: 0;
+}
+#butuxyolid .gt_subtitle {
+color: #333333;
+font-size: 85%;
+font-weight: initial;
+padding-top: 3px;
+padding-bottom: 5px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-color: #FFFFFF;
+border-top-width: 0;
+}
+#butuxyolid .gt_heading {
+background-color: #FFFFFF;
+text-align: center;
+border-bottom-color: #FFFFFF;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#butuxyolid .gt_bottom_border {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#butuxyolid .gt_col_headings {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#butuxyolid .gt_col_heading {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 6px;
+padding-left: 5px;
+padding-right: 5px;
+overflow-x: hidden;
+}
+#butuxyolid .gt_column_spanner_outer {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+padding-top: 0;
+padding-bottom: 0;
+padding-left: 4px;
+padding-right: 4px;
+}
+#butuxyolid .gt_column_spanner_outer:first-child {
+padding-left: 0;
+}
+#butuxyolid .gt_column_spanner_outer:last-child {
+padding-right: 0;
+}
+#butuxyolid .gt_column_spanner {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 5px;
+overflow-x: hidden;
+display: inline-block;
+width: 100%;
+}
+#butuxyolid .gt_spanner_row {
+border-bottom-style: hidden;
+}
+#butuxyolid .gt_group_heading {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+text-align: left;
+}
+#butuxyolid .gt_empty_group_heading {
+padding: 0.5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: middle;
+}
+#butuxyolid .gt_from_md > :first-child {
+margin-top: 0;
+}
+#butuxyolid .gt_from_md > :last-child {
+margin-bottom: 0;
+}
+#butuxyolid .gt_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+margin: 10px;
+border-top-style: solid;
+border-top-width: 1px;
+border-top-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+overflow-x: hidden;
+}
+#butuxyolid .gt_stub {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+}
+#butuxyolid .gt_stub_row_group {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+vertical-align: top;
+}
+#butuxyolid .gt_row_group_first td {
+border-top-width: 2px;
+}
+#butuxyolid .gt_row_group_first th {
+border-top-width: 2px;
+}
+#butuxyolid .gt_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#butuxyolid .gt_first_summary_row {
+border-top-style: solid;
+border-top-color: #D3D3D3;
+}
+#butuxyolid .gt_first_summary_row.thick {
+border-top-width: 2px;
+}
+#butuxyolid .gt_last_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#butuxyolid .gt_grand_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#butuxyolid .gt_first_grand_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-style: double;
+border-top-width: 6px;
+border-top-color: #D3D3D3;
+}
+#butuxyolid .gt_last_grand_summary_row_top {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: double;
+border-bottom-width: 6px;
+border-bottom-color: #D3D3D3;
+}
+#butuxyolid .gt_striped {
+background-color: rgba(128, 128, 128, 0.05);
+}
+#butuxyolid .gt_table_body {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#butuxyolid .gt_footnotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#butuxyolid .gt_footnote {
+margin: 0px;
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#butuxyolid .gt_sourcenotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#butuxyolid .gt_sourcenote {
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#butuxyolid .gt_left {
+text-align: left;
+}
+#butuxyolid .gt_center {
+text-align: center;
+}
+#butuxyolid .gt_right {
+text-align: right;
+font-variant-numeric: tabular-nums;
+}
+#butuxyolid .gt_font_normal {
+font-weight: normal;
+}
+#butuxyolid .gt_font_bold {
+font-weight: bold;
+}
+#butuxyolid .gt_font_italic {
+font-style: italic;
+}
+#butuxyolid .gt_super {
+font-size: 65%;
+}
+#butuxyolid .gt_footnote_marks {
+font-size: 75%;
+vertical-align: 0.4em;
+position: initial;
+}
+#butuxyolid .gt_asterisk {
+font-size: 100%;
+vertical-align: 0;
+}
+#butuxyolid .gt_indent_1 {
+text-indent: 5px;
+}
+#butuxyolid .gt_indent_2 {
+text-indent: 10px;
+}
+#butuxyolid .gt_indent_3 {
+text-indent: 15px;
+}
+#butuxyolid .gt_indent_4 {
+text-indent: 20px;
+}
+#butuxyolid .gt_indent_5 {
+text-indent: 25px;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Truth_nonspam">Truth_nonspam</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Truth_spam">Truth_spam</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><th id="stub_1_1" scope="row" class="gt_row gt_left gt_stub">Classified_nonspam</th>
+<td headers="stub_1_1 Truth_nonspam" class="gt_row gt_right">1278</td>
+<td headers="stub_1_1 Truth_spam" class="gt_row gt_right">193</td></tr>
+    <tr><th id="stub_1_2" scope="row" class="gt_row gt_left gt_stub">Classified_spam</th>
+<td headers="stub_1_2 Truth_nonspam" class="gt_row gt_right">120</td>
+<td headers="stub_1_2 Truth_spam" class="gt_row gt_right">710</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+<center>
+<strong>Table 2.</strong> Contingency table displaying the predicted
+verses true classification of emails in the test set using a boosting
+tree trained using shrinkage value 0.06 and 1000 stumps.
+</center>
+<p></p>
+<p>We next consider the relative influence of variables. This is
+displayed below in Figure 2<span class="math inline">\(\ref{fig:influence}\)</span>. We find similarly to
+our pruned tree analysis that the variables corresponding to the length
+of all-capital strings, the frequency of the exclamation mark “!”, and
+the frequency of the dollar symbol “$” are important classifiers.
+However, our boosting tree suggests that the frequency of the
+exclamation mark is the most important variable in classification.</p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAA4VBMVEUAAAAAADoAAGYAAP8AM/8AOjoAOmYAOpAAZrYAZv8Amf8AzP8A//86AAA6OgA6Ojo6OmY6ZpA6ZrY6kLY6kNtmAABmOgBmOjpmZjpmZmZmZpBmZrZmkLZmkNtmtrZmtttmtv+QOgCQOjqQZjqQZmaQkDqQkGaQkJCQtraQttuQ2/+2ZgC2Zjq2kDq2kGa2kJC2tma2tpC2tra2ttu225C229u22/+2///bkDrbkGbbtmbbtpDbtrbb25Db27bb29vb2//b/7bb/9vb////tmb/25D/27b/29v//7b//9v///99cdSPAAAACXBIWXMAAB2HAAAdhwGP5fFlAAAgAElEQVR4nO3da2MTR5ug4TazAfbgcFhslizzAkN2JsQMM4FN4oW8ITOYg/3/f9CqWwdLtrGpx6pSlfq6vsR2TNN+oG4k9UHdCQAh3aZ3AKBVAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABB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" width="672" /></p>
+<pre><code>##             var   rel.inf
+## bang       bang 42.073856
+## dollar   dollar 31.527925
+## crl.tot crl.tot 13.677295
+## money     money  8.883394
+## n000       n000  2.546210
+## make       make  1.291321</code></pre>
+<center>
+<strong>Figure 2.</strong> Figure displaying the relative influence of
+different predictive variables on classification listed from most (top)
+to least (bottom) influential.
+</center>
+<p></p>
+<!--- Finally, we present the training, cross validation, and test error below in Figure 3 \ref{fig:shrinkage}. As noted, the results in Table 2 \ref{table:boosting} and Figure 2 \ref{fig:influence} are from the model with a shrinkage value of 0.06. 
+
+
+<img src="project-report_files/figure-html/shrinkage_plots-1.png" width="672" /><img src="project-report_files/figure-html/shrinkage_plots-2.png" width="672" /><img src="project-report_files/figure-html/shrinkage_plots-3.png" width="672" />
+<center> **Figure 2.**\label{fig:influence} Figure displaying the training, cross validation, and test error for different shrinkage values. </center> \n
+
+--->
+<p><em>Bagging Trees</em> We next consider bagging trees. We turn to a
+more general version of random forest following this analysis.</p>
+<p>To train our bagging tree model, we used 1000 trees. The performance
+is summarized below in Table 3 <span class="math inline">\(\ref{table:bagging}\)</span>. In total, 86.4% of
+the test observations were correctly classified. Of the spam
+observations, 81.2% were correctly classified as spam. Of the non-spam
+observations, 89.8% were correctly classified as non-spam.</p>
+<div id="tchxowtnoq" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#tchxowtnoq table {
+font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+#tchxowtnoq thead, #tchxowtnoq tbody, #tchxowtnoq tfoot, #tchxowtnoq tr, #tchxowtnoq td, #tchxowtnoq th {
+border-style: none;
+}
+#tchxowtnoq p {
+margin: 0;
+padding: 0;
+}
+#tchxowtnoq .gt_table {
+display: table;
+border-collapse: collapse;
+line-height: normal;
+margin-left: auto;
+margin-right: auto;
+color: #333333;
+font-size: 16px;
+font-weight: normal;
+font-style: normal;
+background-color: #FFFFFF;
+width: auto;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #A8A8A8;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #A8A8A8;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+}
+#tchxowtnoq .gt_caption {
+padding-top: 4px;
+padding-bottom: 4px;
+}
+#tchxowtnoq .gt_title {
+color: #333333;
+font-size: 125%;
+font-weight: initial;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-color: #FFFFFF;
+border-bottom-width: 0;
+}
+#tchxowtnoq .gt_subtitle {
+color: #333333;
+font-size: 85%;
+font-weight: initial;
+padding-top: 3px;
+padding-bottom: 5px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-color: #FFFFFF;
+border-top-width: 0;
+}
+#tchxowtnoq .gt_heading {
+background-color: #FFFFFF;
+text-align: center;
+border-bottom-color: #FFFFFF;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#tchxowtnoq .gt_bottom_border {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#tchxowtnoq .gt_col_headings {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#tchxowtnoq .gt_col_heading {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 6px;
+padding-left: 5px;
+padding-right: 5px;
+overflow-x: hidden;
+}
+#tchxowtnoq .gt_column_spanner_outer {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+padding-top: 0;
+padding-bottom: 0;
+padding-left: 4px;
+padding-right: 4px;
+}
+#tchxowtnoq .gt_column_spanner_outer:first-child {
+padding-left: 0;
+}
+#tchxowtnoq .gt_column_spanner_outer:last-child {
+padding-right: 0;
+}
+#tchxowtnoq .gt_column_spanner {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 5px;
+overflow-x: hidden;
+display: inline-block;
+width: 100%;
+}
+#tchxowtnoq .gt_spanner_row {
+border-bottom-style: hidden;
+}
+#tchxowtnoq .gt_group_heading {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+text-align: left;
+}
+#tchxowtnoq .gt_empty_group_heading {
+padding: 0.5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: middle;
+}
+#tchxowtnoq .gt_from_md > :first-child {
+margin-top: 0;
+}
+#tchxowtnoq .gt_from_md > :last-child {
+margin-bottom: 0;
+}
+#tchxowtnoq .gt_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+margin: 10px;
+border-top-style: solid;
+border-top-width: 1px;
+border-top-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+overflow-x: hidden;
+}
+#tchxowtnoq .gt_stub {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+}
+#tchxowtnoq .gt_stub_row_group {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+vertical-align: top;
+}
+#tchxowtnoq .gt_row_group_first td {
+border-top-width: 2px;
+}
+#tchxowtnoq .gt_row_group_first th {
+border-top-width: 2px;
+}
+#tchxowtnoq .gt_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#tchxowtnoq .gt_first_summary_row {
+border-top-style: solid;
+border-top-color: #D3D3D3;
+}
+#tchxowtnoq .gt_first_summary_row.thick {
+border-top-width: 2px;
+}
+#tchxowtnoq .gt_last_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#tchxowtnoq .gt_grand_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#tchxowtnoq .gt_first_grand_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-style: double;
+border-top-width: 6px;
+border-top-color: #D3D3D3;
+}
+#tchxowtnoq .gt_last_grand_summary_row_top {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: double;
+border-bottom-width: 6px;
+border-bottom-color: #D3D3D3;
+}
+#tchxowtnoq .gt_striped {
+background-color: rgba(128, 128, 128, 0.05);
+}
+#tchxowtnoq .gt_table_body {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#tchxowtnoq .gt_footnotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#tchxowtnoq .gt_footnote {
+margin: 0px;
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#tchxowtnoq .gt_sourcenotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#tchxowtnoq .gt_sourcenote {
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#tchxowtnoq .gt_left {
+text-align: left;
+}
+#tchxowtnoq .gt_center {
+text-align: center;
+}
+#tchxowtnoq .gt_right {
+text-align: right;
+font-variant-numeric: tabular-nums;
+}
+#tchxowtnoq .gt_font_normal {
+font-weight: normal;
+}
+#tchxowtnoq .gt_font_bold {
+font-weight: bold;
+}
+#tchxowtnoq .gt_font_italic {
+font-style: italic;
+}
+#tchxowtnoq .gt_super {
+font-size: 65%;
+}
+#tchxowtnoq .gt_footnote_marks {
+font-size: 75%;
+vertical-align: 0.4em;
+position: initial;
+}
+#tchxowtnoq .gt_asterisk {
+font-size: 100%;
+vertical-align: 0;
+}
+#tchxowtnoq .gt_indent_1 {
+text-indent: 5px;
+}
+#tchxowtnoq .gt_indent_2 {
+text-indent: 10px;
+}
+#tchxowtnoq .gt_indent_3 {
+text-indent: 15px;
+}
+#tchxowtnoq .gt_indent_4 {
+text-indent: 20px;
+}
+#tchxowtnoq .gt_indent_5 {
+text-indent: 25px;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Truth_nonspam">Truth_nonspam</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Truth_spam">Truth_spam</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><th id="stub_1_1" scope="row" class="gt_row gt_left gt_stub">Classified_nonspam</th>
+<td headers="stub_1_1 Truth_nonspam" class="gt_row gt_right">1256</td>
+<td headers="stub_1_1 Truth_spam" class="gt_row gt_right">170</td></tr>
+    <tr><th id="stub_1_2" scope="row" class="gt_row gt_left gt_stub">Classified_spam</th>
+<td headers="stub_1_2 Truth_nonspam" class="gt_row gt_right">142</td>
+<td headers="stub_1_2 Truth_spam" class="gt_row gt_right">733</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+<center>
+<strong>Table 2.</strong> Contingency table displaying the predicted
+verses true classification of emails in the test set using a bagging
+tree trained using 1000 trees.
+</center>
+<p></p>
+<p>Using the bagging tree trained, we also looked at the influence of
+each of the respective variables. We suppress the numerics here as the
+results agree with the order of influence described in Figure 2<span class="math inline">\(\ref{fig:influence}\)</span>.</p>
+<p><em>Random Forest</em> We next consider training random forest models
+with either two or three predictors in 1000 trees. Note that we have a
+total of six predictor variables. We use the rule of thumb that the
+square root of the number of predictor variables is a good number of
+predictors to use in each tree. The square root of six is approximately
+2.5.</p>
+<p>For this report, we give results based on the random forest model
+trained with two predictors as it slightly outperforms the model trained
+with three predictors which resulted in a total classification accuracy
+of 87.4%.</p>
+<p>In Figure 4 <span class="math inline">\(\ref{fig:rf}\)</span>, the
+performance of the random forest model trained with two predictors in
+each tree is displayed. In total, 88.0% of the test observations were
+correctly classified. Of the spam observations, 78.5% were correctly
+classified as spam. Of the non-spam observations, 94.1% were correctly
+classified as non-spam.</p>
+<div id="mqwyztpfqi" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mqwyztpfqi table {
+font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+#mqwyztpfqi thead, #mqwyztpfqi tbody, #mqwyztpfqi tfoot, #mqwyztpfqi tr, #mqwyztpfqi td, #mqwyztpfqi th {
+border-style: none;
+}
+#mqwyztpfqi p {
+margin: 0;
+padding: 0;
+}
+#mqwyztpfqi .gt_table {
+display: table;
+border-collapse: collapse;
+line-height: normal;
+margin-left: auto;
+margin-right: auto;
+color: #333333;
+font-size: 16px;
+font-weight: normal;
+font-style: normal;
+background-color: #FFFFFF;
+width: auto;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #A8A8A8;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #A8A8A8;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_caption {
+padding-top: 4px;
+padding-bottom: 4px;
+}
+#mqwyztpfqi .gt_title {
+color: #333333;
+font-size: 125%;
+font-weight: initial;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-color: #FFFFFF;
+border-bottom-width: 0;
+}
+#mqwyztpfqi .gt_subtitle {
+color: #333333;
+font-size: 85%;
+font-weight: initial;
+padding-top: 3px;
+padding-bottom: 5px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-color: #FFFFFF;
+border-top-width: 0;
+}
+#mqwyztpfqi .gt_heading {
+background-color: #FFFFFF;
+text-align: center;
+border-bottom-color: #FFFFFF;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_bottom_border {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_col_headings {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_col_heading {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 6px;
+padding-left: 5px;
+padding-right: 5px;
+overflow-x: hidden;
+}
+#mqwyztpfqi .gt_column_spanner_outer {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+padding-top: 0;
+padding-bottom: 0;
+padding-left: 4px;
+padding-right: 4px;
+}
+#mqwyztpfqi .gt_column_spanner_outer:first-child {
+padding-left: 0;
+}
+#mqwyztpfqi .gt_column_spanner_outer:last-child {
+padding-right: 0;
+}
+#mqwyztpfqi .gt_column_spanner {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 5px;
+overflow-x: hidden;
+display: inline-block;
+width: 100%;
+}
+#mqwyztpfqi .gt_spanner_row {
+border-bottom-style: hidden;
+}
+#mqwyztpfqi .gt_group_heading {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+text-align: left;
+}
+#mqwyztpfqi .gt_empty_group_heading {
+padding: 0.5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: middle;
+}
+#mqwyztpfqi .gt_from_md > :first-child {
+margin-top: 0;
+}
+#mqwyztpfqi .gt_from_md > :last-child {
+margin-bottom: 0;
+}
+#mqwyztpfqi .gt_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+margin: 10px;
+border-top-style: solid;
+border-top-width: 1px;
+border-top-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+overflow-x: hidden;
+}
+#mqwyztpfqi .gt_stub {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+}
+#mqwyztpfqi .gt_stub_row_group {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+vertical-align: top;
+}
+#mqwyztpfqi .gt_row_group_first td {
+border-top-width: 2px;
+}
+#mqwyztpfqi .gt_row_group_first th {
+border-top-width: 2px;
+}
+#mqwyztpfqi .gt_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#mqwyztpfqi .gt_first_summary_row {
+border-top-style: solid;
+border-top-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_first_summary_row.thick {
+border-top-width: 2px;
+}
+#mqwyztpfqi .gt_last_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_grand_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#mqwyztpfqi .gt_first_grand_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-style: double;
+border-top-width: 6px;
+border-top-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_last_grand_summary_row_top {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: double;
+border-bottom-width: 6px;
+border-bottom-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_striped {
+background-color: rgba(128, 128, 128, 0.05);
+}
+#mqwyztpfqi .gt_table_body {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_footnotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_footnote {
+margin: 0px;
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#mqwyztpfqi .gt_sourcenotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#mqwyztpfqi .gt_sourcenote {
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#mqwyztpfqi .gt_left {
+text-align: left;
+}
+#mqwyztpfqi .gt_center {
+text-align: center;
+}
+#mqwyztpfqi .gt_right {
+text-align: right;
+font-variant-numeric: tabular-nums;
+}
+#mqwyztpfqi .gt_font_normal {
+font-weight: normal;
+}
+#mqwyztpfqi .gt_font_bold {
+font-weight: bold;
+}
+#mqwyztpfqi .gt_font_italic {
+font-style: italic;
+}
+#mqwyztpfqi .gt_super {
+font-size: 65%;
+}
+#mqwyztpfqi .gt_footnote_marks {
+font-size: 75%;
+vertical-align: 0.4em;
+position: initial;
+}
+#mqwyztpfqi .gt_asterisk {
+font-size: 100%;
+vertical-align: 0;
+}
+#mqwyztpfqi .gt_indent_1 {
+text-indent: 5px;
+}
+#mqwyztpfqi .gt_indent_2 {
+text-indent: 10px;
+}
+#mqwyztpfqi .gt_indent_3 {
+text-indent: 15px;
+}
+#mqwyztpfqi .gt_indent_4 {
+text-indent: 20px;
+}
+#mqwyztpfqi .gt_indent_5 {
+text-indent: 25px;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Truth_nonspam">Truth_nonspam</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Truth_spam">Truth_spam</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><th id="stub_1_1" scope="row" class="gt_row gt_left gt_stub">Classified_nonspam</th>
+<td headers="stub_1_1 Truth_nonspam" class="gt_row gt_right">1315</td>
+<td headers="stub_1_1 Truth_spam" class="gt_row gt_right">194</td></tr>
+    <tr><th id="stub_1_2" scope="row" class="gt_row gt_left gt_stub">Classified_spam</th>
+<td headers="stub_1_2 Truth_nonspam" class="gt_row gt_right">83</td>
+<td headers="stub_1_2 Truth_spam" class="gt_row gt_right">709</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+<center>
+<strong>Table 4.</strong> Contingency table displaying the predicted
+verses true classification of emails in the test set using a random
+forest model trained using 1000 trees with two predictors each.
+</center>
+<p></p>
+<p>Using the random forest trained, we again looked at the influence of
+each of the respective variables. As before, we suppress the numerics as
+the results agree with the order of influence described in Figure 2<span class="math inline">\(\ref{fig:influence}\)</span>.</p>
 </div>
 <div class="footnotes footnotes-end-of-document">
 <hr />
