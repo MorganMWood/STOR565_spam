@@ -2,21 +2,13 @@
 title: "Detecting Spam"
 author: 
   - "Written by: Daniel Jouran, Ryan Smith, Morgan Wood, & Shiyunyang Zhao"
-  - "For STOR 565"
+  - "For STOR 565 Final Project"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
   html_document:
     number_sections: true
     theme: journal
     fig_caption: yes
-abstract: |
-  This report compares the performance of various classification methods for detecting spam emails. Using data provided by the TidyTuesday project on the relative frequency of six different words or characters, we
-  
-  (1) provide predictive models that classify emails as either spam or non-spam with over 85% accuracy while only using six descriptive statistics of each email,
-  
-  (2) provide evidence that tree-based methods outperform many other machine learning models in prediction accuracy, and
-  
-  (3) provide insight into the importantance of various email statistics in classification.
 ---
 
 ```{r setup, include=FALSE}
@@ -56,6 +48,25 @@ train_set <- spam_data[sampling_choice, ]
 test_set <- spam_data[-sampling_choice, ]
 ```
 
+# Summary {-}
+
+This report compares the performance of various classification methods for detecting spam emails. Using data provided by the TidyTuesday project on the relative frequency of six different words or characters, we
+  
+  1. provide predictive models that classify emails as either spam or non-spam with over 85% accuracy while only using six descriptive statistics of each email,
+  
+  2. provide evidence that tree-based methods outperform many other machine learning models in prediction accuracy, and
+  
+  3. provide insight into the importance of various email statistics in classification. \n
+
+
+**Statement on the use of AI tools** 
+
+Our group did not use any AI tools during the creation of this report. This includes all categories listed in the "Project-23-updated.pdf" file. \n
+
+**Statement on Member Contribution** 
+
+All group members contributed equally to the creation of this report. We will each fill out the Peer Evaluation Survey. \n
+
 # Overview
 
 Within this report we aim to provide evidence that the classification of spam emails is possible with very few statistics on each email. To do this, we compare the performance of various machine learning models. Within this report we consider the following models,
@@ -79,6 +90,8 @@ To classify emails as either spam or non-spam, we consider a dataset provided by
 The Spam Dataset is a subset of the Spam E-mail Database^[https://search.r-project.org/CRAN/refmans/kernlab/html/spam.html] distributed by R and collected by Hewlett-Packard Labs. In contrast to the Spam Dataset, the Spam E-mail Database contains 57 variables on the same 4601 emails. The Spam Dataset uses 6 variables on the total frequency of various words and characters along with 2 variables related to word and character length from the Spam E-mail Database to instead only display 6 variables on relative frequency.
 
 To compare the performance of each model, our dataset is split approximately 1:1 into a training and test dataset. Each model is trained on 2300 observations, and then performance on the classification of the remaining 2301 test observations is reported.
+
+Our code can be found at the end of this document.
 
 # Variables \label{sec:variables}
 
@@ -236,6 +249,10 @@ min(test_error)
 max(test_error)
 median(test_error)
 
+```
+
+```{r boosting_0.06, include = FALSE}
+
 #Using shrinkage level .06 (found using cv)
 boost.spam.06 <- gbm(yesno ~ ., data = train_set_bern, interaction.depth = 1, distribution = "bernoulli", shrinkage = .06, n.trees = 1000)
 
@@ -271,7 +288,7 @@ We next consider the relative influence of variables. This is displayed below in
 
 ```{r importance_plot, echo=FALSE}
 #Looking at important variables
-summary(boost.spam.06)
+summary(boost.spam.06, las = 1)
 ```
 <center> **Figure 2.**\label{fig:influence} Figure displaying the relative influence of different predictive variables on classification listed from most (top) to least (bottom) influential. </center> \n
 
