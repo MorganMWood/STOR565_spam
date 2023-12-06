@@ -1,0 +1,182 @@
+---
+title: "Detecting Spam"
+author: 
+  - "Written by: Daniel Jouran, Ryan Smith, Morgan Wood, & Shiyunyang Zhao"
+  - "For STOR 565 Final Project"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  bookdown::pdf_document2:
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+library(gt) #for nice tables
+library(tidyverse) #for nice everything else
+
+#packages for KNN & SVM
+library(e1071)
+
+#packages for trees
+library(ISLR)
+library(tree)
+library(randomForest)
+library(gbm)
+```
+
+```{r local_load, include = FALSE}
+#We're going to use this one!!!!
+spam_small <- read_csv("spam_dataset_copy.csv")
+
+spam_data <- data.frame(spam_small)
+spam_data$yesno <- as.factor(spam_data$yesno)
+```
+
+```{r splitting between test and training, include = FALSE}
+#Set seed
+set.seed(123)
+
+#number of observations
+obs_num <- length(spam_data[ , 1])
+
+#Randomly split training data to test data in the ratio of (1:1)
+sampling_choice <- sample(1:obs_num, size = floor(obs_num/2))
+train_set <- spam_data[sampling_choice, ]
+test_set <- spam_data[-sampling_choice, ]
+```
+
+# Summary {-}
+
+This report compares the performance of various classification methods for detecting spam emails. Using data provided by the TidyTuesday project on the relative frequency of six different words or characters, we
+  
+  1. provide predictive models that classify emails as either spam or non-spam with over 85% accuracy while only using six descriptive statistics of each email,
+  
+  2. provide evidence that tree-based methods outperform many other machine learning models in prediction accuracy, and
+  
+  3. provide insight into the importance of various email statistics in classification. \n
+
+
+**Statement on the use of AI tools** 
+
+Our group did not use any AI tools during the creation of this report. This includes all categories listed in the "Project-23-updated.pdf" file. \n
+
+**Statement on Member Contribution** 
+
+All group members contributed equally to the creation of this report. We will each fill out the Peer Evaluation Survey. \n
+
+# Overview
+
+Within this report we aim to provide evidence that the classification of spam emails is possible with very few statistics on each email. To do this, we compare the performance of various machine learning models. Within this report we consider the following models,
+
+* Naïve Bayes,
+
+* Logistic Regression,
+
+* Linear and Quadratic Determinate Analysis (LDA & QDA),
+
+* K-Nearest Neighbors (KNN),
+
+* Linear and Non-Linear Support Vector Machines (SVM), and
+
+* Multiple Tree-Based Methods.
+
+Regarding to the above machine learning algorithms, Naïve Bayes and Logistic Regression allowed us for efficient handling of large datasets and provided clear interpretability. LDA & QDA helped us understand the complex patterns in emails. KNN was used for its simplicity in similarity-based classification. SVMs adeptly managed the high-dimensional nature of text data. Finally, tree-based methods offered deep insights into intricate feature interactions.
+
+To classify emails as either spam or non-spam, we consider a dataset provided by the TidyTuesday Project^[https://github.com/rfordatascience/tidytuesday/tree/979c7204bb80fd3a00ca1b622de7ebd0f49766bf/data/2023/2023-08-15]. We will refer to this dataset as the Spam Dataset for the remainder of this report. The Spam Dataset contains the classification of 4601 emails as either spam or non-spam, and provides information on each email in the form of 6 variables which describe the relative frequency of certain words or characters. We describe these variables in detail Section \ref{sec:variables}. Of the 4601 emails, 1813 are spam observations and 2788 are non-spam observations resulting in an approximately 40:60 split.
+
+The Spam Dataset is a subset of the Spam E-mail Database^[https://search.r-project.org/CRAN/refmans/kernlab/html/spam.html] distributed by R and collected by Hewlett-Packard Labs. In contrast to the Spam Dataset, the Spam E-mail Database contains 57 variables on the same 4601 emails. The Spam Dataset uses 6 variables on the total frequency of various words and characters along with 2 variables related to word and character length from the Spam E-mail Database to instead only display 6 variables on relative frequency.
+
+To compare the performance of each model, our dataset is split approximately 1:1 into a training and test dataset. Each model is trained on 2300 observations, and then performance on the classification of the remaining 2301 test observations is reported.
+
+Our code can be found at the end of this document.
+
+# Variables \label{sec:variables}
+
+Perhaps explain each variable and then some basic exploratory analysis.
+
+# Logistic Regression
+
+# Naïve Bayes
+
+# Tree-Based Methods
+
+We now consider the predictive performance of tree-based methods. The following section will look at
+
+* Classification Trees,
+
+* Boosting Trees,
+
+* Bagging Trees, and
+
+* Random Forest Models.
+
+The models are presented in increasing prediction performance.
+
+*Classification Trees* We begin by training a pruned classification tree as displayed in Figure \@ref(pruned_tree_plot) where 'y' stands for a spam classification and 'n' stands for a non-spam classification. We find that the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$" are important classifiers, with the frequency of the dollar symbol being the most important. Just as intuition would suggest, for each of these variables, larger values suggest that an email should be classified as spam.
+
+```{r classification tree, include=FALSE}
+#Classification tree used to predict yesno using all variables as predictors
+tree.spam <- tree(yesno ~ ., data = train_set)
+
+#Summary that includes used variables, residual mean deviance (similar to entropy), and the training error rate (aka Misclassification error rate)
+summary(tree.spam)
+
+#Plot of tree
+plot(tree.spam)
+text(tree.spam, pretty = 0, cex = .5, adj = c(.5, 1))
+title(main = "Unpruned Classification Tree")
+
+#Predicting the classification of the test_set using the unpruned tree
+tree.predict.spam <- predict(tree.spam, test_set, type = "class")
+
+#Resulting table of prediction vs true values
+table.tree <- table(tree.predict.spam, test_set$yesno)
+table.tree
+
+#Resulting correctness
+#Spam ID
+table.tree[2,2]/(table.tree[2,2] + table.tree[1,2])
+#Not Spam ID
+table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
+#Overall
+(table.tree[2,2] + table.tree[1,1])/(table.tree[2,2] + table.tree[1,2] + table.tree[1,1] + table.tree[2,1])
+```
+
+```{r pruning classification tree, include=FALSE}
+#Setting seed because of cross validation
+set.seed(1243)
+
+#Performs cross validation of the unpruned tree to determine the "best" pruning; the last argument specifies that pruning should be done using the misclassification error rate
+cv.tree.spam <- cv.tree(tree.spam, FUN = prune.misclass)
+
+cv.tree.spam
+
+#creating the pruned tree with 6 terminal nodes
+pruned.tree.spam <- prune.misclass(tree.spam, best = 4)
+
+```
+
+```{r pruned_tree_plot, echo=FALSE, fig.cap = "Pruned classification tree which "}
+#Plotting the tree
+plot(pruned.tree.spam)
+text(pruned.tree.spam, pretty = 0, cex = .5, adj = c(.5, 1))
+title(main = "Pruned Classification Tree")
+```
+
+<center> **Figure  1.**\label{fig:classtree} Pruned classification tree which uses the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$". Here 'y' stands for classifying an email as spam and 'n' stands for classifying an email as non-spam. </center> \n
+
+For the classification tree displayed above, the tree was grown using deviance and then pruned using misclassification. The performance of the classification tree in Figure \ref{fig:classtree} is summarized in Table \ref{table:classtree}. In total, 84.2% of the test observations were correctly classified. Of the spam observations, 74.7% were correctly classified as spam. Of the non-spam observations, 90.4% were correctly classified as non-spam.
+
+It is worth pointing out that the accuracy of this model is near 85% while also being interpretable and, arguably, very simple.
+
+```{r pruned_tree_performance_table, echo = FALSE}
+#Predicting the classification of the test_set using the pruned tree
+tree.predict.spam <- predict(pruned.tree.spam, test_set, type = "class")
+
+#Resulting table of prediction vs true values
+table.tree <- table(tree.predict.spam, test_set$yesno)
+gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
+```
+<center> **Table  1.**\label{table:classtree} Contingency table displaying the predicted verses true classification of emails in the test set using the pruned classification tree in Figure 1. </center> \n
