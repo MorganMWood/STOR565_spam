@@ -5,7 +5,7 @@ author:
   - "For STOR 565 Final Project"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
-  bookdown::pdf_document2:
+  bookdown::html_document2:
 ---
 
 ```{r setup, include=FALSE}
