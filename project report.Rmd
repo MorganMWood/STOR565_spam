@@ -19,6 +19,10 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 library(gt) #for nice tables
 library(tidyverse) #for nice everything else
 
+#packages for Logistic and naive
+library(MASS)
+library(pROC)
+
 #packages for KNN & SVM
 library(e1071)
 
@@ -136,10 +140,9 @@ Definition: The frequency of the word "make" expressed as a percentage of the to
 
 Significance: Highlights instances where the word "make" is overrepresented, a potential indicator of spam language.
 
-*Final Thoughts* These variables collectively serve as effective predictors for discerning the likelihood of an email being spam. An examination of these features in multiple spam emails consistently reveals patterns reflected in the correlation matrix below:
+*Final Thoughts* These variables collectively serve as effective predictors for discerning the likelihood of an email being spam. An examination of these features in multiple spam emails consistently reveals patterns reflected in the correlation matrix below in Table 1.
 
 ```{r, echo = FALSE}
-library(gt)
 numeric_variables <- sapply(spam_data, is.numeric)
 cor_matrix <- cor(spam_data[, numeric_variables])
 cor_table <- gt(as.data.frame(cor_matrix)) %>%
@@ -150,11 +153,161 @@ cor_table <- gt(as.data.frame(cor_matrix)) %>%
 cor_table
 
 ```
-<center> **Table  1.**\label{table:corvar} Correlation matrix of all predictive variables used in our models. </center> \n
+<center> **Table  1.** Correlation matrix of all predictive variables used in our models. </center> \n
 
 # Logistic Regression
 
+We began our analysis by employing a logistic regression model to discern patterns indicative of spam, using all predictors available in our dataset. According to the summary output of this logistic model as shown in Table 2, it is evident that most of the predictor variables, including total length of words in capital letter, frequencies of dollar symbol `$` , bang symbol `!`, the word `money`, and string `000`, in the model are statistically significant, as indicated by their small p-values. This significance suggests that these variables play a crucial role in determining whether an email is spam.  However, a notable exception is the `make` predictor which indicates the frequency of the word `make`.  Its large p-value indicates that this predictor does not contribute significantly to the model in differentiating spam from non-spam emails. 
+
+```{r logistic_model_estimates, echo=FALSE, message=FALSE, warning=FALSE}
+lmod <- glm(yesno ~., data = train_set, family = binomial)
+model_summary <- summary(lmod)
+coef_table <- model_summary$coefficients
+
+knitr::kable(coef_table)
+```
+
+<center> **Table  2.** Table displaying the estimates in the logistic model using all predictors in the dataset. </center> \n
+
+In order to enhance our logistic model performance, we then employed a stepwise selection procedure. This method allowed us to identify and retain the most impactful features in the model. The stepwise selection process resulted in an optimal model, where the predictor `make` was excluded. As shown in Table  3, all remaining predictors were statistically significant. 
+
+```{r optimized-model-summary, echo=FALSE, message=FALSE, warning=FALSE}
+lmod_step <- stepAIC(lmod, direction = "both", trace = FALSE)
+optimized_model_summary <- summary(lmod_step)
+optimized_coef_table <- optimized_model_summary$coefficients
+
+knitr::kable(optimized_coef_table)
+```
+
+<center> **Table  3.**\label{table:logistic} Table displaying the estimates in the optimized logistic model after stepwise selection process. </center> \n
+
+To evaluate the performance of our optimized logistic model, we applied it to the test dataset. This involved generating predictions and comparing them against actual outcomes to assess the model's accuracy and error rates. As shown in Table  4, the optimized logistic model achieved an accuracy of 82.96%. The True Positive Rate reflects that the model correctly identify 65.78% spam emails, and the True Negative Rate of 94.06% is notably high, demonstrating the model's proficiency in correctly identifying non-spam emails.
+
+```{r Logistic performance on test set, include=FALSE}
+test_pred_prob <- predict(lmod_step, newdata = test_set, type = "response")
+test_pred_class <- ifelse(test_pred_prob > 0.5, "y", "n")
+
+table_test <- table(Predicted = test_pred_class, Actual = test_set$yesno)
+
+accuracy_test <- sum(diag(table_test)) / sum(table_test)
+
+TP_test <- table_test[2,2] # True Positives
+TN_test <- table_test[1,1] # True Negatives
+FP_test <- table_test[2,1] # False Positives
+FN_test <- table_test[1,2] # False Negatives
+
+TPR_test <- TP_test / (TP_test + FN_test) # True Positive Rate
+TNR_test <- TN_test / (TN_test + FP_test) # True Negative Rate
+
+cat("Accuracy:", accuracy_test, "\n")
+cat("True Positive Rate:", TPR_test, "\n")
+cat("True Negative Rate:", TNR_test, "\n")
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+performance_metrics <- data.frame(
+  Measure = c("Test Accuracy", "Correct Spam", "Correct Non-Spam"),
+  Score = c(accuracy_test, TPR_test, TNR_test)
+)
+
+knitr::kable(performance_metrics)
+```
+
+<center> **Table  4.** Table displaying the test accuracy, true positive rate and true negative rate of the optimized logistic model. </center> \n
+
+To further assess the performance of our optimized logistic regression model, we generated a ROC curve. The ROC curve for our optimized logistic model, as shown in Figure  1, is observed to be well above the diagonal line which represents the performance of a completely random classifier, characterized by an AUC of 0.5. Additionally, our model's ROC curve shows an AUC substantially higher than 0.5, which is an indicator of good predictive power.
+
+```{r Logistic-ROC, echo=FALSE, message=FALSE, warning=FALSE}
+roc_test <- roc(test_set$yesno, test_pred_prob)
+plot(roc_test, main="ROC Curve for Logistic Model", col="blue")
+```
+
+<center> **Figure  1.** The ROC curve outperforms the diagonal representing a random classifier, indicating the logistic model's effective discrimination between spam and non-spam emails. </center> \n
+
 # Naïve Bayes
+
+In this section, we extended our analysis to include a Naïve Bayes classifier. According to the Naïve Bayes results as shown in Table  5, spam emails typically feature longer sequences of capital letters, more frequent mentions of money-related terms like dollar sign `$` and word `money`, and larger numerical figures, all consistent with common spam characteristics. The word `make` does not significantly differentiate between spam and non-spam, suggesting it's not a reliable feature for spam detection in this context, which is the same result as the logistic model we found in previous section. 
+
+```{r Naive Bayes, include=FALSE}
+nb_mod <- naiveBayes(yesno ~ ., data = train_set)
+nb_mod
+```
+
+```{r, echo=FALSE}
+conditional_probabilities <- data.frame(
+  Feature = rep(c("crl.tot", "dollar", "bang", "money", "n000", "make"), each = 2),
+  Class = c("n", "y", "n", "y", "n", "y", "n", "y", "n", "y", "n", "y"),
+  Mean = c(163.6245, 492.6692, 
+           0.009777698, 0.175452747, 
+           0.1023986, 0.4972802, 
+           0.01180576, 0.20468132, 
+           0.007597122, 0.260021978, 
+           0.07404317, 0.16031868),
+  SD = c(353.9725, 903.5050, 
+         0.05134497, 0.33529176, 
+         0.9358777, 0.7548440, 
+         0.1115096, 0.4713259, 
+         0.07804936, 0.52941818, 
+         0.3064346, 0.2995090)
+)
+
+knitr::kable(conditional_probabilities, 
+             align = 'c')
+```
+
+<center> **Table  5.** Table displaying the conditional probabiliteis of the Naïve Bayes model. </center> \n
+
+Based on the conclusion we got from the first Naïve Bayes regression, we decided to discard the predictor `make` which is not a impactful feature to detect spam emails. We then fit a new Naïve Bayes model excluding the `make` predictor and then test this new model on the test dataset. As shown in Table  6, our new Naïve Bayes demonstrated a test accuracy of 77.3% which is slightly lower than that of logistic model. However, its True Negative Rate of 95.4% highlights a strong ability to accurately recognize non-spam emails, while its True Positive Rate of 49.3% suggests moderate success in correctly identifying spam. 
+
+```{r Naive Bayes2, include=FALSE}
+nb_mod2 <- naiveBayes(yesno ~ crl.tot + dollar + bang + money + n000, data = train_set)
+nb_mod2
+```
+
+```{r Naive Bayes performance on test set, include=FALSE}
+test_pred <- predict(nb_mod2, newdata = test_set, type = "class")
+
+# Create a confusion matrix
+conf_mat <- table(Predicted = test_pred, Actual = test_set$yesno)
+
+test_accuracy_nb <- sum(diag(conf_mat)) / sum(conf_mat)
+
+TP_test_nb <- conf_mat[2,2] # True Positives
+TN_test_nb <- conf_mat[1,1] # True Negatives
+FP_test_nb <- conf_mat[2,1] # False Positives
+FN_test_nb <- conf_mat[1,2] # False Negatives
+
+TPR_test_nb <- TP_test_nb / (TP_test_nb + FN_test_nb) # True Positive Rate
+TNR_test_nb <- TN_test_nb / (TN_test_nb + FP_test_nb) # True Negative Rate
+
+cat("Test accuracy:", test_accuracy_nb, "\n")
+cat("True Positive Rate:", TPR_test_nb, "\n")
+cat("True Negative Rate:", TNR_test_nb, "\n")
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+performance_metrics_nb <- data.frame(
+  Measure = c("Test Accuracy", "Correct Spam", "Correct Non-Spam"),
+  Score = c(test_accuracy_nb, TPR_test_nb, TNR_test_nb)
+)
+
+knitr::kable(performance_metrics_nb)
+```
+
+<center> **Table  6.**Table displaying the test accuracy, true positive rate and true nagetive rate of the Naïve Bayes model. </center> \n
+
+We then generated the ROC curve for Naïve Bayes model, as shown in Figure  3. The curve is observed to be well above the diagonal line, and it shows an AUC higher than 0.5, which is an indicator of good predictive power.
+
+```{r Naïve Bayes-ROC, echo=FALSE, message=FALSE, warning=FALSE}
+test_prob <- predict(nb_mod2, newdata = test_set, type = "raw")[, 2] 
+
+roc_obj <- roc(as.factor(test_set$yesno), test_prob)
+
+plot(roc_obj, main="ROC Curve for Naive Bayes Model", col="blue")
+```
+
+<center> **Figure  3.** The ROC curve for Naïve Bayes model outperforms the diagonal representing a random classifier. </center> \n
+
 
 # Support Vector Machines (Non-Linear and Linear)
 
@@ -166,7 +319,7 @@ We now consider the predictive performance of Support Vector Machines. The follo
 
 The models are presented in increasing predictive performance.
 
-*Linear Support Vector Machine* Like other model techniques, we begin by using the trained data to build a linear support vector machine using all variables as predictors and the classification of the email being "yes" or "no" as the response. We first tune the linear support vector machine to prevent overfitting or creating too much variance. Then we employ the SVM on the test data to predict whether or not an email is spam. Finally, we represented the performance of our linear support vector machine in the contingency table below.
+*Linear Support Vector Machine* Like other model techniques, we begin by using the trained data to build a linear support vector machine using all variables as predictors and the classification of the email being "yes" or "no" as the response. We first tune the linear support vector machine to prevent overfitting or creating too much variance. Then we employ the SVM on the test data to predict whether or not an email is spam. Finally, we represented the performance of our linear support vector machine in the contingency table below in Table 7.
 
 ```{r, echo = FALSE}
 
@@ -183,11 +336,11 @@ gt(data.frame(Truth_nonspam = table_linear[ , 1], Truth_spam = table_linear[ , 2
 
 
 ```
-<center> **Table  1.**\label{table:conflinear} Contingency table displaying the predicted versus true classification of emails in the test set using our Linear Support Vector Machine. </center> \n
+<center> **Table  7.** Contingency table displaying the predicted versus true classification of emails in the test set using our Linear Support Vector Machine. </center> \n
 
 Our linear support vector machine when predicting whether or not an email is spam generally performed well with an overall accuracy of 83%. Like our other models, the linear SVM performed very well in distinguishing emails that are not spam, producing a true-negativity rate of 94.49%. However, the linear SVM model struggled more with detecting spam emails, producing a true-positive rate of 65.23%. In most of our models mentioned in this paper, the distinguishing factor would be its ability to avoid type-1 errors. Although our true-positive rate is not up to par with our true-negativity rate, it is worth noting that it performed considerably well against other models mentioned in this paper.
 
-*Non-Linear Support Vector Machine* Similar to our linear support vector machine, we begin with using the training data to build our non-linear support vector machine. We used the same predictors and response variables as the linear SVM. Identically, we first tune our Non-Linear SVM to avoid over-fitting or high variance. Then, we used our Non-Linear SVM model to predict whether or not a given email is spam. Finally, we represented the performance of our non-linear support vector machine in the contingency table below. 
+*Non-Linear Support Vector Machine* Similar to our linear support vector machine, we begin with using the training data to build our non-linear support vector machine. We used the same predictors and response variables as the linear SVM. Identically, we first tune our Non-Linear SVM to avoid over-fitting or high variance. Then, we used our Non-Linear SVM model to predict whether or not a given email is spam. Finally, we represented the performance of our non-linear support vector machine in the contingency table below in Table 8. 
 
 ```{r, echo = FALSE}
 #Non-linear
@@ -205,7 +358,7 @@ table_nonlinear <- table(predictions, test_set$yesno)
 gt(data.frame(Truth_nonspam = table_nonlinear[ , 1], Truth_spam = table_nonlinear[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
 
 ```
-<center> **Table  2.**\label{table:confnonlinear} Contingency table displaying the predicted versus true classification of emails in the test set using our Non-Linear Support Vector Machine. </center> \n
+<center> **Table  8.** Contingency table displaying the predicted versus true classification of emails in the test set using our Non-Linear Support Vector Machine. </center> \n
 
 Our non-linear support vector machine performed better than our linear SVM in predicting whether or not an email is spam or not. Generally, the non-linear SVM had an accuracy of 85.7% as opposed to 83% of the linear SVM. An interesting observation was that the non-linear SVM particularly improved on the ability of the linear SVM to avoid type-1 error or in other words the true-positive rate. In fact, the non-linear SVM true-positive rate is 74.42% which is a 7.19% improvement of the linear SVM. However, the non-linear SVM declined in the true-negativity rate by 1.5% as opposed to the linear SVM. 
 
@@ -213,7 +366,7 @@ Our non-linear support vector machine performed better than our linear SVM in pr
 
 # K-Nearest Neighbors Method
 
-Like other model techniques, we begin by using the trained data to build a K-Nearest Neighbors model using all variables as predictors and the classification of the email as "yes" or "no" as the response. We first chose a K value of 10 since this value performed the best. Then we employ our KNN model on the test data to predict whether or not an email is spam. Finally, we represented the performance of our KNN model's performance in the contingency table below.
+Like other model techniques, we begin by using the trained data to build a K-Nearest Neighbors model using all variables as predictors and the classification of the email as "yes" or "no" as the response. We first chose a K value of 10 since this value performed the best. Then we employ our KNN model on the test data to predict whether or not an email is spam. Finally, we represented the performance of our KNN model's performance in the contingency table below in Table 9.
 
 
 ```{r, echo = FALSE}
@@ -257,7 +410,7 @@ table_KNN <- table(predictions, test_set$yesno)
 gt(data.frame(Truth_nonspam = table_KNN[ , 1], Truth_spam = table_KNN[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
 
 ```
-<center> **Table  3.**\label{table:confKNN} Contingency table displaying the predicted versus true classification of emails in the test set using our K-Nearest Neighbor Model. </center> \n
+<center> **Table  9.** Contingency table displaying the predicted versus true classification of emails in the test set using our K-Nearest Neighbor Model. </center> \n
 
 Our K-Nearest Neighbor model did not perform as well as we had hoped. Other models discussed so far performed much better in almost all metrics including true-positive, true-negativity, and general accuracy rates. Our general accuracy of 72.75%. Our KNN model struggled to detect spam emails with a rate a true-positive rate of 55.15%. However, the KNN model did very poorly compared to all other models at predicting non-spam. Our KNN model performed the worst out of all models with a true-negativity rate of 84.12%. Our true-negativity performance was surprising since all models were efficient when predicting non-spam emails. Thus, we would not use our KNN model when predicting spam emails.
 
@@ -275,7 +428,7 @@ We now consider the predictive performance of tree-based methods. The following 
 
 The models are presented in increasing prediction performance.
 
-*Classification Trees* We begin by training a pruned classification tree as displayed in Figure \ref{fig:classtree} where 'y' stands for a spam classification and 'n' stands for a non-spam classification. We find that the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$" are important classifiers, with the frequency of the dollar symbol being the most important. Just as intuition would suggest, for each of these variables, larger values suggest that an email should be classified as spam.
+*Classification Trees* We begin by training a pruned classification tree as displayed in Figure 4 where 'y' stands for a spam classification and 'n' stands for a non-spam classification. We find that the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$" are important classifiers, with the frequency of the dollar symbol being the most important. Just as intuition would suggest, for each of these variables, larger values suggest that an email should be classified as spam.
 
 ```{r classification tree, include=FALSE}
 #Classification tree used to predict yesno using all variables as predictors
@@ -326,9 +479,9 @@ text(pruned.tree.spam, pretty = 0, cex = .5, adj = c(.5, 1))
 title(main = "Pruned Classification Tree")
 ```
 
-<center> **Figure  1.**\label{fig:classtree} Pruned classification tree which uses the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$". Here 'y' stands for classifying an email as spam and 'n' stands for classifying an email as non-spam. </center> \n
+<center> **Figure  4.** Pruned classification tree which uses the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$". Here 'y' stands for classifying an email as spam and 'n' stands for classifying an email as non-spam. </center> \n
 
-For the classification tree displayed above, the tree was grown using deviance and then pruned using misclassification. The performance of the classification tree in Figure \ref{fig:classtree} is summarized in Table \ref{table:classtree}. In total, 84.2% of the test observations were correctly classified. Of the spam observations, 74.7% were correctly classified as spam. Of the non-spam observations, 90.4% were correctly classified as non-spam.
+For the classification tree displayed above, the tree was grown using deviance and then pruned using misclassification. The performance of the classification tree in Figure 4 is summarized in Table 10. In total, 84.2% of the test observations were correctly classified. Of the spam observations, 74.7% were correctly classified as spam. Of the non-spam observations, 90.4% were correctly classified as non-spam.
 
 It is worth pointing out that the accuracy of this model is near 85% while also being interpretable and, arguably, very simple.
 
@@ -340,7 +493,7 @@ tree.predict.spam <- predict(pruned.tree.spam, test_set, type = "class")
 table.tree <- table(tree.predict.spam, test_set$yesno)
 gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
 ```
-<center> **Table  1.**\label{table:classtree} Contingency table displaying the predicted verses true classification of emails in the test set using the pruned classification tree in Figure 1. </center> \n
+<center> **Table  10.** Contingency table displaying the predicted verses true classification of emails in the test set using the pruned classification tree in Figure 1. </center> \n
 
 ```{r pruned_tree_performance, include=FALSE}
 #Resulting correctness
@@ -434,21 +587,21 @@ table.tree[1,1]/(table.tree[1,1] + table.tree[2,1])
 
 ```
 
-For a boosted tree with shrinkage value 0.06, we first look at the performance of this model which is displayed in Table 2 \ref{table:boosting}. In total, 86.4% of the test observations were correctly classified. Of the spam observations, 78.1% were correctly classified as spam. Of the non-spam observations, 91.8% were correctly classified as non-spam.
+For a boosted tree with shrinkage value 0.06, we first look at the performance of this model which is displayed in Table 11. In total, 86.4% of the test observations were correctly classified. Of the spam observations, 78.1% were correctly classified as spam. Of the non-spam observations, 91.8% were correctly classified as non-spam.
 
 ```{r boosting_performance_table, echo = FALSE}
 #Resulting table of prediction vs true values
 gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
 ```
-<center> **Table  2.**\label{table:boosting} Contingency table displaying the predicted verses true classification of emails in the test set using a boosting tree trained using shrinkage value 0.06 and 1000 stumps. </center> \n
+<center> **Table  11.** Contingency table displaying the predicted verses true classification of emails in the test set using a boosting tree trained using shrinkage value 0.06 and 1000 stumps. </center> \n
 
-We next consider the relative influence of variables. This is displayed below in Figure 2\ref{fig:influence}. We find similarly to our pruned tree analysis that the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$" are important classifiers. However, our boosting tree suggests that the frequency of the exclamation mark is the most important variable in classification.
+We next consider the relative influence of variables. This is displayed below in Figure 5. We find similarly to our pruned tree analysis that the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$" are important classifiers. However, our boosting tree suggests that the frequency of the exclamation mark is the most important variable in classification.
 
 ```{r importance_plot, echo=FALSE}
 #Looking at important variables
 summary(boost.spam.06, las = 1)
 ```
-<center> **Figure 2.**\label{fig:influence} Figure displaying the relative influence of different predictive variables on classification listed from most (top) to least (bottom) influential. </center> \n
+<center> **Figure 5.** Figure displaying the relative influence of different predictive variables on classification listed from most (top) to least (bottom) influential. </center> \n
 
 <!--- Finally, we present the training, cross validation, and test error below in Figure 3 \ref{fig:shrinkage}. As noted, the results in Table 2 \ref{table:boosting} and Figure 2 \ref{fig:influence} are from the model with a shrinkage value of 0.06. 
 
@@ -470,7 +623,7 @@ title("Test set error")
 
 *Bagging Trees* We next consider bagging trees. We turn to a more general version of random forest following this analysis. 
 
-To train our bagging tree model, we used 1000 trees. The performance is summarized below in Table 3 \ref{table:bagging}. In total, 86.4% of the test observations were correctly classified. Of the spam observations, 81.2% were correctly classified as spam. Of the non-spam observations, 89.8% were correctly classified as non-spam.
+To train our bagging tree model, we used 1000 trees. The performance is summarized below in Table 12. In total, 86.4% of the test observations were correctly classified. Of the spam observations, 81.2% were correctly classified as spam. Of the non-spam observations, 89.8% were correctly classified as non-spam.
 
 ```{r bagging, include=FALSE}
 #setting the seed
@@ -505,15 +658,15 @@ varImpPlot(bag.spam)
 #Resulting table of prediction vs true values
 gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
 ```
-<center> **Table  2.**\label{table:bagging} Contingency table displaying the predicted verses true classification of emails in the test set using a bagging tree trained using 1000 trees. </center> \n
+<center> **Table  12.** Contingency table displaying the predicted verses true classification of emails in the test set using a bagging tree trained using 1000 trees. </center> \n
 
-Using the bagging tree trained, we also looked at the influence of each of the respective variables. We suppress the numerics here as the results agree with the order of influence described in Figure 2\ref{fig:influence}.
+Using the bagging tree trained, we also looked at the influence of each of the respective variables. We suppress the numerics here as the results agree with the order of influence described in Figure 5.
 
 *Random Forest* We next consider training random forest models with either two or three predictors in 1000 trees. Note that we have a total of six predictor variables. We use the rule of thumb that the square root of the number of predictor variables is a good number of predictors to use in each tree. The square root of six is approximately 2.5.
 
 For this report, we give results based on the random forest model trained with two predictors as it slightly outperforms the model trained with three predictors which resulted in a total classification accuracy of 87.4%.
 
-In Figure 4 \ref{fig:rf}, the performance of the random forest model trained with two predictors in each tree is displayed.  In total, 88.0% of the test observations were correctly classified. Of the spam observations, 78.5% were correctly classified as spam. Of the non-spam observations, 94.1% were correctly classified as non-spam.
+In Table 13, the performance of the random forest model trained with two predictors in each tree is displayed. In total, 88.0% of the test observations were correctly classified. Of the spam observations, 78.5% were correctly classified as spam. Of the non-spam observations, 94.1% were correctly classified as non-spam.
 
 ```{r RF2, include=FALSE}
 #setting the seed
@@ -547,8 +700,8 @@ varImpPlot(rf2.spam)
 #Resulting table of prediction vs true values
 gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], row.names = c("Classified_nonspam", "Classified_spam")), rownames_to_stub = TRUE)
 ```
-<center> **Table  4.**\label{table:bagging} Contingency table displaying the predicted verses true classification of emails in the test set using a random forest model trained using 1000 trees with two predictors each. </center> \n
+<center> **Table  13.** Contingency table displaying the predicted verses true classification of emails in the test set using a random forest model trained using 1000 trees with two predictors each. </center> \n
 
-Using the random forest trained, we again looked at the influence of each of the respective variables. As before, we suppress the numerics as the results agree with the order of influence described in Figure 2\ref{fig:influence}.
+Using the random forest trained, we again looked at the influence of each of the respective variables. As before, we suppress the numerics as the results agree with the order of influence described in Figure 5.
 
 
