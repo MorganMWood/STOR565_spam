@@ -1,0 +1,64 @@
+---
+title: "lda_qda"
+author: "Ryan Smith"
+date: "2023-12-07"
+output: html_document
+---
+
+# Linear Discriminant Analysis and Quadratic Discriminant Analysis
+
+The next method we used was Linear Discriminant Analysis (LDA) and Quadratic Discriminant Analysis (QDA). These processes, while being methods of classification for data analysis, also focus on dimensional reduction. LDA focuses more on the assumption of a common covariance matrix in the data whereas QDA can be more flexible and support a wider variety of datasets.
+
+To ensure the assumptions of both LDA and QDA were met within the data, we scaled each predictor to have means of 0 and standard deviations of 1. Comparing the LDA's and QDA's of original and scaled data yielded the exact same results, thus we cann assume that there is a common covariance matrix among the predictors. Below we performed both LDA and QDA and found Correct Spam, Correct Non-Spam, and Overall Accuracy Rates.
+
+```{r, include=FALSE}
+mod_l <- lda(yesno~., data=train_set)
+predictions <- predict(mod_l, test_set)
+actual <- test_set$yesno
+pred_l <- predictions$class
+t13 <- table(pred_l, actual)
+cat("\nCorrect Spam: ", (t13[4]/(t13[4]+t13[2])),
+  "\nCorrect Non-Spam: ", (t13[1]/(t13[1]+t13[3])),
+  "\nAccuracy: ", mean(predictions1$class==test_set$yesno))
+roc_l = roc(response=test_set$yesno, predictor=predictions$posterior[,2])
+
+mod_q <- qda(yesno~., data=train_set)
+predictions1 <- predict(mod_q, test_set)
+pred_q <- predictions1$class
+t12 <- table(pred_q, actual)
+cat("\nCorrect Spam: ", (t12[4]/(t12[4]+t12[2])),
+  "\nCorrect Non-Spam: ", (t12[1]/(t12[1]+t12[3])),
+  "\nAccuracy: ", mean(predictions1$class==test_set$yesno))
+roc_q = roc(response=test_set$yesno, predictor=predictions1$posterior[,2])
+
+tpr_lda <- (t13[4]/(t13[4]+t13[2]))
+tnr_lda <- (t13[1]/(t13[1]+t13[3]))
+accuracy_lda <- mean(predictions$class==test_set$yesno)
+tpr_qda <- (t12[4]/(t12[4]+t12[2]))
+tnr_qda <- (t12[1]/(t12[1]+t12[3]))
+accuracy_qda <- mean(predictions1$class==test_set$yesno)
+```
+
+```{r}
+performance_metrics_da <- data.frame(
+  Measure = c("Test Accuracy", "Correct Spam", "Correct Non-Spam"),
+  LDA_Score = c(accuracy_lda, tpr_lda, tnr_lda),
+  QDA_Score = c(accuracy_qda, tpr_qda, tnr_qda)
+)
+
+knitr::kable(performance_metrics_da)
+```
+
+Looking at the test dataset, QDA has the higher overall accuracy along with the higher rate of emails correctly identified as spam, but LDA had a higher rate of emails correctly identified as non-spam.
+
+```{r}
+ggroc(list(lda=roc_l, qda=roc_q))
+```
+<center> **Figure  3.**\label{fig:ldq/qda} The ROC curve for LDA and QDA models are shown to both be curves above </center> \n
+
+```{r}
+cat("\nArea Under the Curve for LDA: ", auc(roc_l)[1])
+cat("\nArea Under the Curve for QDA: ", auc(roc_q)[1])
+```
+
+Looking at the combined plot of ROC curves for the LDA and QDA methods, as shown in **Figure  3**, the curves are well above the diagonal random-classifier line. Below the graphic, we can see AUC values far above 0.5 showing that both curves are indicators of good predictive power. The LDA is shown in the graph to be better in predictions, but the QDA has higher accuracy in this specific dataset, specifically in the test data which shows conflicting results.
