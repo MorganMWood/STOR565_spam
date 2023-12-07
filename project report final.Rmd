@@ -696,4 +696,5 @@ gt(data.frame(Truth_nonspam = table.tree[ , 1], Truth_spam = table.tree[ , 2], r
 
 Using the random forest trained, we again looked at the influence of each of the respective variables. As before, we suppress the numerics as the results agree with the order of influence described in Figure 5.
 
+# Summary of Results
 
