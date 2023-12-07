@@ -99,7 +99,7 @@ The Spam Dataset is a subset of the Spam E-mail Database^[https://search.r-proje
 
 To compare the performance of each model, our dataset is split approximately 1:1 into a training and test dataset. Each model is trained on 2300 observations, and then performance on the classification of the remaining 2301 test observations is reported.
 
-Our code can be found at the end of this document.
+Our code will be send along with this pdf document.
 
 # Variables \label{sec:variables}
 
