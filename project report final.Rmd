@@ -25,6 +25,7 @@ library(pROC)
 
 #packages for KNN & SVM
 library(e1071)
+library(class)
 
 #packages for trees
 library(ISLR)
@@ -90,7 +91,7 @@ Within this report we aim to provide evidence that the classification of spam em
 
 * Multiple Tree-Based Methods.
 
-Regarding to the above machine learning algorithms, Naïve Bayes and Logistic Regression allowed us for efficient handling of large datasets and provided clear interpretability. LDA & QDA helped us understand the complex patterns in emails. KNN was used for its simplicity in similarity-based classification. SVMs adeptly managed the high-dimensional nature of text data. Finally, tree-based methods offered deep insights into intricate feature interactions.
+Regarding to the above machine learning algorithms, Naïve Bayes and Logistic Regression allows us to efficiently handle the large dataset and providing interpretability. LDA & QDA helps us understand the complex patterns in emails. KNN is used for its simplicity in similarity-based classification. SVMs are advantageous for achieving high accuracy with a clear margin of separation to categorize emails into "spam" or "non-spam". Finally, tree-based methods such as random forest models offer insights into variable importance.
 
 To classify emails as either spam or non-spam, we consider a dataset provided by the TidyTuesday Project^[https://github.com/rfordatascience/tidytuesday/tree/979c7204bb80fd3a00ca1b622de7ebd0f49766bf/data/2023/2023-08-15]. We will refer to this dataset as the Spam Dataset for the remainder of this report. The Spam Dataset contains the classification of 4601 emails as either spam or non-spam, and provides information on each email in the form of 6 variables which describe the relative frequency of certain words or characters. We describe these variables in detail Section 2. Of the 4601 emails, 1813 are spam observations and 2788 are non-spam observations resulting in an approximately 40:60 split.
 
@@ -153,7 +154,7 @@ cor_table <- gt(as.data.frame(cor_matrix)) %>%
 cor_table
 
 ```
-<center> **Table  1.** Correlation matrix of all predictive variables used in our models. </center> \n
+<center> **Table 1.** Correlation matrix of all predictive variables used in our models. </center> \n
 
 # Logistic Regression
 
@@ -166,10 +167,9 @@ coef_table <- model_summary$coefficients
 
 knitr::kable(coef_table)
 ```
+<center> **Table 2.** Table displaying the estimates in the logistic model using all predictors in the dataset. </center> \n
 
-<center> **Table  2.** Table displaying the estimates in the logistic model using all predictors in the dataset. </center> \n
-
-In order to enhance our logistic model performance, we then employed a stepwise selection procedure. This method allowed us to identify and retain the most impactful features in the model. The stepwise selection process resulted in an optimal model, where the predictor `make` was excluded. As shown in Table  3, all remaining predictors were statistically significant. 
+In order to enhance our logistic model performance, we then employed a stepwise selection procedure. This method allowed us to identify and retain the most impactful features in the model. The stepwise selection process resulted in an optimal model, where the predictor `make` was excluded. As shown in Table 3, all remaining predictors were statistically significant. 
 
 ```{r optimized-model-summary, echo=FALSE, message=FALSE, warning=FALSE}
 lmod_step <- stepAIC(lmod, direction = "both", trace = FALSE)
@@ -178,10 +178,9 @@ optimized_coef_table <- optimized_model_summary$coefficients
 
 knitr::kable(optimized_coef_table)
 ```
+<center> **Table 3.**\label{table:logistic} Table displaying the estimates in the optimized logistic model after a stepwise selection process. </center> \n
 
-<center> **Table  3.**\label{table:logistic} Table displaying the estimates in the optimized logistic model after stepwise selection process. </center> \n
-
-To evaluate the performance of our optimized logistic model, we applied it to the test dataset. This involved generating predictions and comparing them against actual outcomes to assess the model's accuracy and error rates. As shown in Table  4, the optimized logistic model achieved an accuracy of 82.96%. The True Positive Rate reflects that the model correctly identify 65.78% spam emails, and the True Negative Rate of 94.06% is notably high, demonstrating the model's proficiency in correctly identifying non-spam emails.
+To evaluate the performance of our optimized logistic model, we applied it to the test dataset. This involved generating predictions and comparing them against actual outcomes to assess the model's accuracy and error rates. As shown in Table 4, the optimized logistic model achieved an accuracy of 82.96%. The True Positive Rate reflects that the model correctly identify 65.78% spam emails, and the True Negative Rate of 94.06% is notably high, demonstrating the model's proficiency in correctly identifying non-spam emails.
 
 ```{r Logistic performance on test set, include=FALSE}
 test_pred_prob <- predict(lmod_step, newdata = test_set, type = "response")
@@ -212,21 +211,19 @@ performance_metrics <- data.frame(
 
 knitr::kable(performance_metrics)
 ```
+<center> **Table 4.** Table displaying the test accuracy, true positive rate and true negative rate of the optimized logistic model. </center> \n
 
-<center> **Table  4.** Table displaying the test accuracy, true positive rate and true negative rate of the optimized logistic model. </center> \n
-
-To further assess the performance of our optimized logistic regression model, we generated a ROC curve. The ROC curve for our optimized logistic model, as shown in Figure  1, is observed to be well above the diagonal line which represents the performance of a completely random classifier, characterized by an AUC of 0.5. Additionally, our model's ROC curve shows an AUC substantially higher than 0.5, which is an indicator of good predictive power.
+To further assess the performance of our optimized logistic regression model, we generated a ROC curve. The ROC curve for our optimized logistic model, as shown in Figure 1, is observed to be well above the diagonal line which represents the performance of a completely random classifier, characterized by an AUC of 0.5. Additionally, our model's ROC curve shows an AUC substantially higher than 0.5, which is an indicator of good predictive power.
 
 ```{r Logistic-ROC, echo=FALSE, message=FALSE, warning=FALSE}
 roc_test <- roc(test_set$yesno, test_pred_prob)
 plot(roc_test, main="ROC Curve for Logistic Model", col="blue")
 ```
-
-<center> **Figure  1.** The ROC curve outperforms the diagonal representing a random classifier, indicating the logistic model's effective discrimination between spam and non-spam emails. </center> \n
+<center> **Figure 1.** The ROC curve outperforms the diagonal representing a random classifier, indicating the logistic model's effective discrimination between spam and non-spam emails. </center> \n
 
 # Naïve Bayes
 
-In this section, we extended our analysis to include a Naïve Bayes classifier. According to the Naïve Bayes results as shown in Table  5, spam emails typically feature longer sequences of capital letters, more frequent mentions of money-related terms like dollar sign `$` and word `money`, and larger numerical figures, all consistent with common spam characteristics. The word `make` does not significantly differentiate between spam and non-spam, suggesting it's not a reliable feature for spam detection in this context, which is the same result as the logistic model we found in previous section. 
+In this section, we extend our analysis to include a Naïve Bayes classifier. According to the Naïve Bayes results as shown in Table 5, spam emails typically feature longer sequences of capital letters, more frequent mentions of money-related terms like dollar sign `$` and word `money`, and larger numerical figures, all consistent with common spam characteristics. The word `make` does not significantly differentiate between spam and non-spam, suggesting it's not a reliable feature for spam detection in this context, which is the same result as the logistic model suggested in the previous section. 
 
 ```{r Naive Bayes, include=FALSE}
 nb_mod <- naiveBayes(yesno ~ ., data = train_set)
@@ -254,10 +251,9 @@ conditional_probabilities <- data.frame(
 knitr::kable(conditional_probabilities, 
              align = 'c')
 ```
+<center> **Table 5.** Table displaying the conditional probabilities of the Naïve Bayes model. </center> \n
 
-<center> **Table  5.** Table displaying the conditional probabiliteis of the Naïve Bayes model. </center> \n
-
-Based on the conclusion we got from the first Naïve Bayes regression, we decided to discard the predictor `make` which is not a impactful feature to detect spam emails. We then fit a new Naïve Bayes model excluding the `make` predictor and then test this new model on the test dataset. As shown in Table  6, our new Naïve Bayes demonstrated a test accuracy of 77.3% which is slightly lower than that of logistic model. However, its True Negative Rate of 95.4% highlights a strong ability to accurately recognize non-spam emails, while its True Positive Rate of 49.3% suggests moderate success in correctly identifying spam. 
+Based on the conclusion from the first Naïve Bayes regression, we decided to discard the predictor `make` which is not a impactful feature to detect spam emails. We then fit a new Naïve Bayes model excluding the `make` predictor and then test this new model on the test dataset. As shown in Table 6, our new Naïve Bayes demonstrated a test accuracy of 77.3% which is slightly lower than that of logistic model. However, its True Negative Rate of 95.4% highlights a strong ability to accurately recognize non-spam emails, while its True Positive Rate of 49.3% suggests moderate success in correctly identifying spam. 
 
 ```{r Naive Bayes2, include=FALSE}
 nb_mod2 <- naiveBayes(yesno ~ crl.tot + dollar + bang + money + n000, data = train_set)
@@ -293,10 +289,9 @@ performance_metrics_nb <- data.frame(
 
 knitr::kable(performance_metrics_nb)
 ```
+<center> **Table  6.**Table displaying the test accuracy, true positive rate and true negative rate of the Naïve Bayes model. </center> \n
 
-<center> **Table  6.**Table displaying the test accuracy, true positive rate and true nagetive rate of the Naïve Bayes model. </center> \n
-
-We then generated the ROC curve for Naïve Bayes model, as shown in Figure  3. The curve is observed to be well above the diagonal line, and it shows an AUC higher than 0.5, which is an indicator of good predictive power.
+We then generated the ROC curve for Naïve Bayes model, as shown in Figure 3. The curve is observed to be well above the diagonal line, and it shows an AUC higher than 0.5, which is an indicator of good predictive power.
 
 ```{r Naïve Bayes-ROC, echo=FALSE, message=FALSE, warning=FALSE}
 test_prob <- predict(nb_mod2, newdata = test_set, type = "raw")[, 2] 
@@ -305,7 +300,6 @@ roc_obj <- roc(as.factor(test_set$yesno), test_prob)
 
 plot(roc_obj, main="ROC Curve for Naive Bayes Model", col="blue")
 ```
-
 <center> **Figure  3.** The ROC curve for Naïve Bayes model outperforms the diagonal representing a random classifier. </center> \n
 
 
@@ -313,9 +307,9 @@ plot(roc_obj, main="ROC Curve for Naive Bayes Model", col="blue")
 
 We now consider the predictive performance of Support Vector Machines. The following section will explore two different Support Vector Machines:
 
-*Linear Support Vector Machines
+  * Linear Support Vector Machines and
 
-*Non-Linear Support Vector Machines
+  * Non-Linear Support Vector Machines.
 
 The models are presented in increasing predictive performance.
 
@@ -366,8 +360,7 @@ Our non-linear support vector machine performed better than our linear SVM in pr
 
 # K-Nearest Neighbors Method
 
-Like other model techniques, we begin by using the trained data to build a K-Nearest Neighbors model using all variables as predictors and the classification of the email as "yes" or "no" as the response. We first chose a K value of 10 since this value performed the best. Then we employ our KNN model on the test data to predict whether or not an email is spam. Finally, we represented the performance of our KNN model's performance in the contingency table below in Table 9.
-
+Like other model techniques, we begin by using the trained data to build a K-Nearest Neighbors model using all variables as predictors and the classification of the email as "yes" or "no" as the response. We first chose a K value of 10 since this value performed the best under cross validation. Then we employ our KNN model on the test data to predict whether or not an email is spam. Finally, we represented the performance of our KNN model's performance in the contingency table below in Table 9.
 
 ```{r, echo = FALSE}
 # KNN
@@ -418,13 +411,13 @@ Our K-Nearest Neighbor model did not perform as well as we had hoped. Other mode
 
 We now consider the predictive performance of tree-based methods. The following section will look at
 
-* Classification Trees,
+  * Classification Trees,
 
-* Boosting Trees,
+  * Boosting Trees,
 
-* Bagging Trees, and
+  * Bagging Trees, and
 
-* Random Forest Models.
+  * Random Forest Models.
 
 The models are presented in increasing prediction performance.
 
@@ -478,7 +471,6 @@ plot(pruned.tree.spam)
 text(pruned.tree.spam, pretty = 0, cex = .5, adj = c(.5, 1))
 title(main = "Pruned Classification Tree")
 ```
-
 <center> **Figure  4.** Pruned classification tree which uses the variables corresponding to the length of all-capital strings, the frequency of the exclamation mark "!", and the frequency of the dollar symbol "$". Here 'y' stands for classifying an email as spam and 'n' stands for classifying an email as non-spam. </center> \n
 
 For the classification tree displayed above, the tree was grown using deviance and then pruned using misclassification. The performance of the classification tree in Figure 4 is summarized in Table 10. In total, 84.2% of the test observations were correctly classified. Of the spam observations, 74.7% were correctly classified as spam. Of the non-spam observations, 90.4% were correctly classified as non-spam.
