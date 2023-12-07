@@ -352,7 +352,7 @@ Looking at the test dataset, QDA has the higher overall accuracy along with the 
 ```{r, echo = FALSE}
 ggroc(list(lda=roc_l, qda=roc_q))
 ```
-<center> **Figure  4.**\label{fig:ldq/qda} The ROC curve for LDA and QDA models are shown to both be curves above </center> \n
+<center> **Figure  4.** The ROC curve for LDA and QDA models are shown to both be curves above </center> \n
 
 ```{r, echo = FALSE}
 cat("\nArea Under the Curve for LDA: ", auc(roc_l)[1])
@@ -653,24 +653,6 @@ summary(boost.spam.06, las = 1)
 ```
 <center> **Figure 6.** Figure displaying the relative influence of different predictive variables on classification listed from most (top) to least (bottom) influential. </center> \n
 
-<!--- Finally, we present the training, cross validation, and test error below in Figure 6 \ref{fig:shrinkage}. As noted, the results in Table 2 \ref{table:boosting} and Figure 7 \ref{fig:influence} are from the model with a shrinkage value of 0.06. 
-
-
-```{r shrinkage_plots, echo=FALSE}
-plot(seq(0.01, 0.1, by = .01), train_error, xlab = "lambda")
-title("Training set error")
-
-plot(seq(0.01, 0.1, by = .01), cv_error, xlab = "lambda")
-title("CV error")
-
-plot(seq(0.01, 0.1, by = .01), test_error, xlab = "lambda")
-title("Test set error")
-```
-<center> **Figure 7.**\label{fig:influence} Figure displaying the training, cross validation, and test error for different shrinkage values. </center> \n
-
---->
-
-
 *Bagging Trees* We next consider bagging trees. We turn to a more general version of random forest following this analysis. 
 
 To train our bagging tree model, we used 1000 trees. The performance is summarized below in Table 13. In total, 86.4% of the test observations were correctly classified. Of the spam observations, 81.2% were correctly classified as spam. Of the non-spam observations, 89.8% were correctly classified as non-spam.
@@ -765,8 +747,8 @@ results_table <- data.frame(
 
 knitr::kable(results_table)
 ```
-<center> **Figure  9.**\label{fig:total_results} The table above shows Correct Spam (True Positive), Correct Non-Spam (True Negative), and Overall Accuracy rates for each method used </center> \n
+<center> **Figure  7.** The table above shows Correct Spam (True Positive), Correct Non-Spam (True Negative), and Overall Accuracy rates for each method used </center> \n
 
-Shown in **Figure 9.**, we can see each method's accuracy rates shown for predictions of spam vs non-spam emails. Overall, most methods yielded high accuracy as even the least accurate predictive method, K-Nearest Neighbors, still had 72.8\& of emails correctly identified. The most accurate, based on these predictions, was Random Forest regression, with 88\% correct, and was followed by Bagging and Boosting, each with 86.4\% correct. This shows that tree-based methods generally performed the best in predicting email content.
+Shown in Figure 7, we can see each method's accuracy rates shown for predictions of spam vs non-spam emails. Overall, most methods yielded high accuracy as even the least accurate predictive method, K-Nearest Neighbors, still had 72.8% of emails correctly identified. The most accurate, based on these predictions, was Random Forest regression, with 88% correct, and was followed by Bagging and Boosting, each with 86.4% correct. This shows that tree-based methods generally performed the best in predicting email content.
 
-We can also see that across each method, non-spam accuracy is far higher than spam accuracy which may represent places for future work. Non-spam accuracy is, on average, about 27\% higher than spam accuracy meaning there is still exists a problem with Type I errors that could be improved in future work, as long as it does not compromise the low rate of Type II errors.
+We can also see that across each method, non-spam accuracy is far higher than spam accuracy which may represent places for future work. Non-spam accuracy is, on average, about 27% higher than spam accuracy meaning there is still exists a problem with Type I errors that could be improved in future work, as long as it does not compromise the low rate of Type II errors.
